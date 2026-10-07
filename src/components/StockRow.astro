@@ -27,14 +27,14 @@ const { t, rank } = Astro.props;
 .tk{font-size:20px;font-weight:650;letter-spacing:.2px}
 .nm{font-size:15px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .meta{font-size:13px;color:var(--ink-3)}
-.ret{font-size:30px;line-height:1;letter-spacing:-.3px}
+.ret{font-size:26px;line-height:1;letter-spacing:-.3px}
 .chart{min-width:0;display:block}
 .dd{display:flex;flex-direction:column;gap:8px;align-items:flex-end;font-size:15px;color:var(--ink-3)}
 .dd b{font-size:17px;font-weight:600}
 @media (max-width:980px){
   .row{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"who ret" "chart chart" "dd dd";gap:10px 12px;padding:18px 0 16px}
   .rank{display:none}
-  .who{grid-area:who}.ret{grid-area:ret;font-size:28px}.chart{grid-area:chart}
+  .who{grid-area:who}.ret{grid-area:ret;font-size:24px}.chart{grid-area:chart}
   .chart :global(svg){height:64px}
   .tk{font-size:18px}.nm{font-size:14px}.meta{font-size:12px}
   .dd{grid-area:dd;flex-direction:row;gap:16px;align-items:center;font-size:13px}.dd b{font-size:13px}

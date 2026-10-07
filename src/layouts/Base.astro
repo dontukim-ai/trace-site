@@ -27,7 +27,7 @@ const yt = 'https://www.youtube.com/@us_stock_filter_report';
 <link rel="preload" href="/fonts/PretendardVariable.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
 </head>
 <body>
 <header class="hd">
@@ -58,14 +58,14 @@ const yt = 'https://www.youtube.com/@us_stock_filter_report';
 </html>
 <style>
 .hd{border-bottom:1px solid var(--line)}
-.hd-in{display:flex;align-items:center;gap:48px;height:88px}
-.brand{display:flex;align-items:baseline;gap:10px}
-.wm{font-size:36px;line-height:1;letter-spacing:-.5px}
+.hd-in{display:flex;align-items:baseline;gap:48px;padding-top:30px}
+.brand{display:flex;align-items:baseline;gap:10px;padding-bottom:26px}
+.wm{font-size:32px;line-height:1;letter-spacing:-.6px}
 .by{font-size:12px;color:var(--ink-3)}
-.nav{display:flex;gap:28px;font-size:14px;flex-grow:1;align-self:stretch}
-.nav a{display:flex;align-items:center;color:var(--ink-3);border-bottom:2px solid transparent;margin-bottom:-1px}
+.nav{display:flex;gap:28px;font-size:14px;flex-grow:1}
+.nav a{display:inline-block;padding-bottom:26px;color:var(--ink-3);border-bottom:2px solid transparent;margin-bottom:-1px}
 .nav a[aria-current=page]{color:var(--ink);font-weight:600;border-bottom-color:var(--ink)}
-.side{display:flex;gap:20px;align-items:center;font-size:13px;color:var(--ink-3)}
+.side{display:flex;gap:20px;align-items:baseline;font-size:13px;color:var(--ink-3)}
 .yt{color:var(--ink);font-weight:600}
 .menu{display:none;margin-left:auto}
 .menu summary{list-style:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer}
@@ -75,6 +75,6 @@ const yt = 'https://www.youtube.com/@us_stock_filter_report';
 .menu-panel a[aria-current=page]{font-weight:600}
 .menu-panel span{padding-top:12px;font-size:13px}
 .ft{padding-block:56px 64px;font-size:12px;color:var(--ink-3);line-height:1.6}
-.ft p{margin:0;max-width:62ch}
-@media (max-width:960px){.nav,.side{display:none}.menu{display:block}.hd-in{height:60px;position:relative}.wm{font-size:28px}.hd{position:relative}}
+.ft p{margin:0}
+@media (max-width:960px){.nav,.side{display:none}.menu{display:block}.hd-in{height:60px;position:relative;align-items:center;padding-top:0}.brand{padding-bottom:0}.wm{font-size:26px}.hd{position:relative}}
 </style>
