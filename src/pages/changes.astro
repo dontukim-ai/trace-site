@@ -1,6 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
-import { data, nameOf, pct, dir, screenLabel } from '../lib/data';
+import { data, nameOf, pct, dir, screenLabel, isEnded } from '../lib/data';
 const rows = [...data.tickers].sort((a, b) => b.ret_since_entry - a.ret_since_entry);
 ---
 <Base title="변경 기록" description="Tracing 종목별 편입과 주간 스크린 결과의 변화 기록." active="changes">
@@ -9,6 +9,7 @@ const rows = [...data.tickers].sort((a, b) => b.ret_since_entry - a.ret_since_en
     <section class="blk">
       <a class="who" href={`/t/${t.ticker.toLowerCase()}/`}><span class="tk">{t.ticker}</span><span class="nm">{nameOf(t.ticker)}</span><span class={`r serif ${dir(t.ret_since_entry)}`}>{pct(t.ret_since_entry)}</span></a>
       <ol class="log">
+        {isEnded(t) && t.exit_date && <li><span class="d">{t.exit_date}</span><span>편입 후 {t.days_since_entry}거래일, 기록 종료 · 최종 {pct(t.ret_since_entry)}</span></li>}
         {t.screen && <li><span class="d">{t.screen.asof}</span><span>주간 스크린 {screenLabel(t.screen.result)}{t.screen.result !== '통과' && ` · ${t.screen.stage}`}</span></li>}
         <li><span class="d">{t.entry_date}</span><span>{t.episode}회 방송에서 편입 · 3개월 고점 대비 {pct(t.entry_vs_hi3m)}</span></li>
       </ol>
