@@ -42,7 +42,7 @@
   },
   "ICHR": {
    "name": "아이커 홀딩스",
-   "sector": ""
+   "sector": "반도체 장비"
   },
   "ALAB": {
    "name": "아스테라 랩스",
@@ -94,23 +94,59 @@
   },
   "ESAB": {
    "name": "에삽",
-   "sector": ""
+   "sector": "용접·절단 장비"
   },
   "BOOT": {
    "name": "부트 반",
-   "sector": ""
+   "sector": "의류 소매"
   },
   "KNF": {
    "name": "나이프 리버",
-   "sector": ""
+   "sector": "건자재"
   },
   "TTAM": {
    "name": "타이탄 아메리카",
-   "sector": ""
+   "sector": "건자재"
   },
   "CRI": {
    "name": "카터스",
-   "sector": ""
+   "sector": "아동복"
+  },
+  "MTZ": {
+   "name": "매스텍",
+   "sector": "건설·엔지니어링"
+  },
+  "NXT": {
+   "name": "넥스트파워",
+   "sector": "태양광 장비"
+  },
+  "SOLS": {
+   "name": "솔스티스 어드밴스드 머티리얼즈",
+   "sector": "특수소재"
+  },
+  "BROS": {
+   "name": "더치 브로스",
+   "sector": "외식"
+  },
+  "CAVA": {
+   "name": "카바",
+   "sector": "외식"
+  },
+  "RSI": {
+   "name": "러시 스트리트 인터랙티브",
+   "sector": "온라인 게임"
+  },
+  "PTRN": {
+   "name": "패턴 그룹",
+   "sector": "이커머스"
+  },
+  "CLBT": {
+   "name": "셀레브라이트",
+   "sector": "디지털 포렌식"
+  },
+  "PRVA": {
+   "name": "프리비아 헬스",
+   "sector": "의료 서비스"
   }
  },
  "episodes": {
@@ -125,6 +161,10 @@
   "3": {
    "youtube": "1feejlq96nc",
    "title": "9월 4주차 | 조건 통과 미국주식 16종목 · 3개월 25% 하락 후 반등 시작"
+  },
+  "4": {
+   "youtube": "J6q7-NC3DZA",
+   "title": "10월 1주차 | 조건 통과 미국주식 12종목 · 지난주 10종목 중 9개가 빠졌다"
   }
  }
 }

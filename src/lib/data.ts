@@ -19,11 +19,13 @@ export const data = trace as unknown as {
     by_group: Record<string, { n: number; in90: number; in50: number }> };
   screen_funnel: Record<string, any> | null;
 };
-const M = meta as { tickers: Record<string, { name: string; sector: string }>; episodes: Record<string, { youtube: string; title: string }> };
+// trace.json 의 meta(trace-data/data/meta.json)를 우선 쓰고, 없으면 저장소의 meta.json 을 쓴다.
+const M = ((trace as any).meta ?? meta) as { tickers: Record<string, { name: string; sector: string }>; episodes: Record<string, { youtube: string; title: string }> };
 
 export const nameOf = (t: string) => M.tickers[t]?.name ?? '';
 export const sectorOf = (t: string) => M.tickers[t]?.sector ?? '';
-export const video = (ep: number) => M.episodes[String(ep)];
+/** 영상 ID가 아직 없는 회차(방송 전)는 undefined */
+export const video = (ep: number) => { const v = M.episodes[String(ep)]; return v?.youtube ? v : undefined; };
 
 /** +22.8% / −40.7% (true minus, one decimal) */
 export const pct = (r: number, digits = 1) => {
