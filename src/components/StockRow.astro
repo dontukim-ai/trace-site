@@ -1,21 +1,22 @@
 ---
 import TraceChart from './TraceChart.astro';
-import { type Ticker, nameOf, pct, dir, mmdd } from '../lib/data';
+import { type Ticker, nameOf, pct, dir, mmdd, isEnded } from '../lib/data';
 interface Props { t: Ticker; rank: number }
 const { t, rank } = Astro.props;
+const ended = isEnded(t) && t.exit_date;
 ---
 <a class="row" href={`/t/${t.ticker.toLowerCase()}/`} data-ep={t.episode}>
   <span class="rank serif">{String(rank).padStart(2, '0')}</span>
   <span class="who">
     <span class="tk">{t.ticker}</span>
     <span class="nm">{nameOf(t.ticker)}</span>
-    <span class="meta">{t.episode}회 · {mmdd(t.entry_date)} 편입</span>
+    <span class="meta">{t.episode}회 · {mmdd(t.entry_date)} 편입{ended && ` · ${mmdd(ended)} 종료`}</span>
   </span>
   <span class={`ret serif ${dir(t.ret_since_entry)}`}>{pct(t.ret_since_entry)}</span>
   <span class="chart"><TraceChart t={t} /></span>
   <span class="dd">
     <span>편입 때 <b class={dir(t.entry_vs_hi3m)}>{pct(t.entry_vs_hi3m)}</b></span>
-    <span>지금 <b class={dir(t.now_vs_hi3m)}>{pct(t.now_vs_hi3m)}</b></span>
+    <span>{ended ? '종료 때' : '지금'} <b class={dir(t.now_vs_hi3m)}>{pct(t.now_vs_hi3m)}</b></span>
   </span>
 </a>
 <style>
