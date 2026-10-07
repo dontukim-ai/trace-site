@@ -1,7 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
 import { geometry } from '../../lib/chart';
-import { data, type Ticker, nameOf, sectorOf, pct, dir, md, video, screenLabel, lookbackLevels, korDate } from '../../lib/data';
+import { data, type Ticker, nameOf, sectorOf, aboutOf, fundParts, pct, dir, md, video, screenLabel, lookbackLevels, korDate, isEnded, HOLD_DAYS } from '../../lib/data';
 
 export function getStaticPaths() {
   return data.tickers.map(t => ({ params: { ticker: t.ticker.toLowerCase() }, props: { t } }));
@@ -9,6 +9,8 @@ export function getStaticPaths() {
 const { t } = Astro.props as { t: Ticker };
 const name = nameOf(t.ticker), sector = sectorOf(t.ticker), v = video(t.episode);
 const lbs = lookbackLevels(t) ?? [];
+const about = aboutOf(t.ticker), fin = fundParts(t.fundamentals);
+const ended = isEnded(t) && t.exit_date;
 
 // big chart
 const CW = 1168, CH = 420, PH = CH - 34, RP = 150;
@@ -36,7 +38,13 @@ const st = t.screen;
   <section class="title">
     <div class="tl">
       <div class="nm"><h1>{t.ticker}</h1><span>{name}</span></div>
-      <span class="sub">{sector && `${sector} · `}{t.episode}회 방송 · {t.entry_date} 편입 · 편입 후 {t.days_since_entry}거래일</span>
+      <span class="sub">{sector && `${sector} · `}{t.episode}회 방송 · {t.entry_date} 편입 · {ended ? `${ended} 기록 종료 (${t.days_since_entry}거래일)` : `편입 후 ${t.days_since_entry}거래일`}</span>
+      {(about || fin.length > 0) && (
+        <div class="about">
+          {about && <p>{about}</p>}
+          {fin.length > 0 && <p class="fin">{fin.join(' · ')} <span class="src">Yahoo Finance · {korDate(t.fundamentals!.asof)} 기준</span></p>}
+        </div>
+      )}
     </div>
     {v && <a class="btn" href={`https://www.youtube.com/watch?v=${v.youtube}`} rel="noopener">{t.episode}회 방송 보기 ↗</a>}
   </section>
@@ -44,7 +52,7 @@ const st = t.screen;
   <div class="strip">
     <div class="cell"><span class="lab">편입 후</span><span class={`big serif ${dir(t.ret_since_entry)}`}>{pct(t.ret_since_entry)}</span></div>
     <div class="cell"><span class="lab">편입 때 3개월 고점 대비</span><span class={`val ${dir(t.entry_vs_hi3m)}`}>{pct(t.entry_vs_hi3m)}</span></div>
-    <div class="cell"><span class="lab">지금 3개월 고점 대비</span><span class={`val ${dir(t.now_vs_hi3m)}`}>{pct(t.now_vs_hi3m)}</span></div>
+    <div class="cell"><span class="lab">{ended ? '종료 때' : '지금'} 3개월 고점 대비</span><span class={`val ${dir(t.now_vs_hi3m)}`}>{pct(t.now_vs_hi3m)}</span></div>
     <div class="cell"><span class="lab">편입 후 최고</span><span class={`val ${dir(t.max_since_entry)}`}>{pct(t.max_since_entry)}</span></div>
     <div class="cell"><span class="lab">편입 후 최저</span><span class={`val ${dir(t.min_since_entry)}`}>{pct(t.min_since_entry)}</span></div>
   </div>
@@ -85,17 +93,18 @@ const st = t.screen;
           {lbs.map(l => <div class="tr"><span>{l.lb}일{l.lb === '60' && <small> 기본 표시</small>}</span><span class={`r b ${dir(l.ret)}`}>{pct(l.ret)}</span><span class="r muted">{l.level.toFixed(1)}</span></div>)}
         </div>
         <span class="fine">Kronos-{t.kronos.model} {t.kronos.model_rev} · 경로 64개 · T 1.0</span>
-      </> : <p>아직 Kronos 기록이 없습니다. 다음 거래일 아침에 생깁니다.</p>}
+      </> : <p>{ended ? '기록이 끝난 종목이라 Kronos 밴드를 더 그리지 않습니다.' : '아직 Kronos 기록이 없습니다. 다음 거래일 아침에 생깁니다.'}</p>}
     </section>
     <section class="col">
       <h2>이번 주 스크린</h2>
       {st ? <>
         <div class="stat"><span class={`pill ${st.result === '통과' ? 'pass' : st.result === '대기' ? 'wait' : 'out'}`}>{screenLabel(st.result)}</span><span class="muted">{korDate(st.asof)} 기준</span></div>
         {st.result !== '통과' && <p>처음 걸린 조건: {st.stage}. {st.reasons.replace(/-/g, '−')}.</p>}
-      </> : <p>이번 주 스크린 기록이 없습니다.</p>}
-      <p>한 번 편입된 종목은 조건과 관계없이 계속 기록합니다.</p>
+      </> : <p>{ended ? '기록이 끝난 종목이라 스크린 결과를 붙이지 않습니다.' : '이번 주 스크린 기록이 없습니다.'}</p>}
+      <p>편입된 종목은 편입 후 {HOLD_DAYS}거래일(약 6개월) 동안 조건과 관계없이 기록하고, 그 뒤에는 기록을 마치고 최종 결과를 남깁니다.</p>
       <h3>기록</h3>
       <div class="tbl">
+        {ended && <div class="tr2"><span class="muted">{ended}</span><span>편입 후 {t.days_since_entry}거래일, 기록 종료 · 최종 {pct(t.ret_since_entry)}</span></div>}
         {st && <div class="tr2"><span class="muted">{st.asof}</span><span>스크린 결과 {screenLabel(st.result)}</span></div>}
         <div class="tr2"><span class="muted">{t.entry_date}</span><span>{t.episode}회 방송에서 편입 · 3개월 고점 대비 {pct(t.entry_vs_hi3m)}</span></div>
       </div>
@@ -110,6 +119,10 @@ const st = t.screen;
 h1{margin:0;font-size:34px;font-weight:700;letter-spacing:.2px}
 .nm span{font-size:20px;color:var(--ink-2)}
 .sub{font-size:14px;color:var(--ink-3)}
+.about{display:flex;flex-direction:column;gap:4px;margin-top:6px;max-width:72ch}
+.about p{margin:0;font-size:15px;line-height:1.6;color:var(--ink-2)}
+.about .fin{font-size:14px}
+.about .src{font-size:12px;color:var(--ink-4);margin-left:6px;white-space:nowrap}
 .btn{font-size:14px;font-weight:600;padding:10px 16px;border:1px solid #d9dbdf;border-radius:999px}
 .strip{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));border-top:1px solid var(--line-strong);border-bottom:1px solid var(--line)}
 .cell{display:flex;flex-direction:column;gap:8px;padding:20px 20px 22px}

@@ -1,6 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
-import { data, korDate } from '../lib/data';
+import { data, korDate, HOLD_DAYS } from '../lib/data';
 const f = data.screen_funnel;
 const steps = f ? [
   ['시가총액 $3억 이상 미국 상장', f.F0_universe],
@@ -38,6 +38,13 @@ const max = steps.length ? steps[0][1] : 1;
         <li>순부채라면 이자보상배율 3배 이상</li>
       </ul>
       <p class="fine">조건을 통과한 종목이 적어도 기준을 낮추지 않습니다. 매주 토요일(한국 시간) 미국 종가 기준으로 다시 거릅니다.</p>
+      <h2 class="gap">기록 기간</h2>
+      <ul class="fin">
+        <li>편입 후 {HOLD_DAYS}거래일(약 6개월) 동안 조건과 관계없이 매일 기록합니다.</li>
+        <li>{HOLD_DAYS}거래일째 종가에서 기록을 마치고, 그날까지의 수익률을 최종 결과로 남깁니다.</li>
+        <li>가격 수준(손실·이익 폭)으로는 기록을 끝내지 않습니다. 기록 종료는 매도 신호가 아닙니다.</li>
+        <li>기록을 마친 종목도 지우지 않고 '기록 종료' 목록에 남깁니다.</li>
+      </ul>
     </section>
     {f && <section>
       <h2>이번 주 단계별 잔존 수 <span class="muted asof">{korDate(f.asof)} 종가</span></h2>
@@ -59,6 +66,7 @@ h2{margin:0 0 12px;font-size:18px;font-weight:650}
 .cond b{font-weight:600}
 .fin{margin:0 0 20px;padding-left:18px;display:flex;flex-direction:column;gap:8px;font-size:14px;color:var(--ink-2)}
 .fine{font-size:13px;color:var(--ink-3);line-height:1.6;margin:0}
+h2.gap{margin-top:32px}
 .fun{list-style:none;margin:0 0 14px;padding:0}
 .fun li{display:grid;grid-template-columns:minmax(0,190px) minmax(0,1fr) 56px;gap:12px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);font-size:13px}
 .l{color:var(--ink-2)}.n{text-align:right;font-weight:600}
