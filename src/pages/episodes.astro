@@ -1,0 +1,43 @@
+---
+import Base from '../layouts/Base.astro';
+import { data, nameOf, pct, dir, video, korDate } from '../lib/data';
+const by = new Map(data.tickers.map(t => [t.ticker, t]));
+const eps = [...data.episodes].sort((a, b) => b.episode - a.episode).map(e => {
+  const ts = e.tickers.map(k => by.get(k)!).filter(Boolean).sort((a, b) => b.ret_since_entry - a.ret_since_entry);
+  const up = ts.filter(t => t.ret_since_entry > 0).length;
+  return { ...e, ts, up, v: video(e.episode) };
+});
+---
+<Base title="회차" active="episodes">
+  <section class="top"><h1 class="serif">회차</h1></section>
+  {eps.map(e => (
+    <section class="ep">
+      <div class="eh">
+        <div class="et">
+          <span class="no serif">{e.episode}회</span>
+          <span class="muted">{korDate(e.date)} 종가 기준 편입 · {e.ts.length}종목 · 지금 상승 {e.up} / 하락 {e.ts.length - e.up}</span>
+          {e.v && <span class="vt">{e.v.title}</span>}
+        </div>
+        {e.v && <a class="btn" href={`https://www.youtube.com/watch?v=${e.v.youtube}`} rel="noopener">방송 보기 ↗</a>}
+      </div>
+      <ul class="tks">
+        {e.ts.map(t => <li><a href={`/t/${t.ticker.toLowerCase()}/`}><span class="tk">{t.ticker}</span><span class="nm">{nameOf(t.ticker)}</span><span class={`r ${dir(t.ret_since_entry)}`}>{pct(t.ret_since_entry)}</span></a></li>)}
+      </ul>
+    </section>
+  ))}
+</Base>
+<style>
+.top{padding-block:40px 20px}
+h1{margin:0;font-size:40px;line-height:1;letter-spacing:-.5px}
+.ep{border-top:1px solid var(--line-strong);padding-block:22px 36px}
+.eh{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;flex-wrap:wrap}
+.et{display:flex;flex-direction:column;gap:6px;font-size:13px}
+.no{font-size:30px;line-height:1}
+.vt{font-size:15px;color:var(--ink-2)}
+.btn{font-size:14px;font-weight:600;padding:10px 16px;border:1px solid #d9dbdf;border-radius:999px}
+.tks{list-style:none;margin:20px 0 0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:40px}
+.tks a{display:grid;grid-template-columns:64px minmax(0,1fr) auto;gap:12px;align-items:baseline;padding:12px 0;border-bottom:1px solid var(--line);font-size:15px}
+.tk{font-weight:650}.nm{color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.r{font-weight:600}
+@media (max-width:960px){.tks{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:600px){.tks{grid-template-columns:1fr}}
+</style>

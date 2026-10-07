@@ -1,0 +1,42 @@
+---
+import TraceChart from './TraceChart.astro';
+import { type Ticker, nameOf, pct, dir, mmdd } from '../lib/data';
+interface Props { t: Ticker; rank: number }
+const { t, rank } = Astro.props;
+---
+<a class="row" href={`/t/${t.ticker.toLowerCase()}/`} data-ep={t.episode}>
+  <span class="rank serif">{String(rank).padStart(2, '0')}</span>
+  <span class="who">
+    <span class="tk">{t.ticker}</span>
+    <span class="nm">{nameOf(t.ticker)}</span>
+    <span class="meta">{t.episode}회 · {mmdd(t.entry_date)} 편입</span>
+  </span>
+  <span class={`ret serif ${dir(t.ret_since_entry)}`}>{pct(t.ret_since_entry)}</span>
+  <span class="chart"><TraceChart t={t} /></span>
+  <span class="dd">
+    <span>편입 때 <b class={dir(t.entry_vs_hi3m)}>{pct(t.entry_vs_hi3m)}</b></span>
+    <span>지금 <b class={dir(t.now_vs_hi3m)}>{pct(t.now_vs_hi3m)}</b></span>
+  </span>
+</a>
+<style>
+.row{display:grid;grid-template-columns:36px 220px 110px minmax(0,1fr) 170px;gap:24px;align-items:center;padding:22px 0;border-bottom:1px solid var(--line)}
+.row[hidden]{display:none}
+.row:hover{color:inherit}.row:hover .tk{text-decoration:underline;text-underline-offset:3px}
+.rank{font-size:16px;color:var(--ink-5)}
+.who{display:flex;flex-direction:column;gap:4px;min-width:0}
+.tk{font-size:20px;font-weight:650;letter-spacing:.2px}
+.nm{font-size:15px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.meta{font-size:13px;color:var(--ink-3)}
+.ret{font-size:30px;line-height:1;letter-spacing:-.3px}
+.chart{min-width:0;display:block}
+.dd{display:flex;flex-direction:column;gap:8px;align-items:flex-end;font-size:15px;color:var(--ink-3)}
+.dd b{font-size:17px;font-weight:600}
+@media (max-width:760px){
+  .row{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"who ret" "chart chart" "dd dd";gap:10px 12px;padding:18px 0 16px}
+  .rank{display:none}
+  .who{grid-area:who}.ret{grid-area:ret;font-size:28px}.chart{grid-area:chart}
+  .chart :global(svg){height:64px}
+  .tk{font-size:18px}.nm{font-size:14px}.meta{font-size:12px}
+  .dd{grid-area:dd;flex-direction:row;gap:16px;align-items:center;font-size:13px}.dd b{font-size:13px}
+}
+</style>

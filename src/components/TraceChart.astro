@@ -1,0 +1,28 @@
+---
+import type { Ticker } from '../lib/data';
+import { geometry } from '../lib/chart';
+interface Props { t: Ticker; w?: number; h?: number; class?: string }
+const { t, w = 520, h = 88, class: cls = '' } = Astro.props;
+const g = geometry(t, w, h);
+---
+<svg class={`tc ${cls}`} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" role="img"
+  aria-label={`${t.ticker} 편입 전후 지수와 Kronos 20거래일 밴드`}>
+  <line x1="0" x2={w} y1={g.base} y2={g.base} class="base" />
+  {g.outer && <path d={g.outer} class="bo" />}
+  {g.inner && <path d={g.inner} class="bi" />}
+  {g.med && <path d={g.med} class="med" />}
+  <path d={g.pre} class="pre" />
+  <path d={g.post} class="post" />
+  {g.lbs.length > 0 && <line x1={g.bx} x2={g.bx} y1={g.by1} y2={g.by2} class="bar" />}
+  <rect x={g.ex - 3} y={g.ey - 3} width="6" height="6" class="mark" />
+</svg>
+<style>
+.tc{display:block;width:100%;height:auto;overflow:visible}
+.base{stroke:var(--line);stroke-width:1;vector-effect:non-scaling-stroke}
+.bo{fill:var(--band-outer)}.bi{fill:var(--band-inner)}
+.med{fill:none;stroke:var(--band-median);stroke-width:1.25;stroke-dasharray:3 3;vector-effect:non-scaling-stroke}
+.pre{fill:none;stroke:var(--chart-pre);stroke-width:1.5;vector-effect:non-scaling-stroke}
+.post{fill:none;stroke:var(--chart-post);stroke-width:1.75;vector-effect:non-scaling-stroke}
+.bar{stroke:var(--ink);stroke-width:2.5;stroke-linecap:round;vector-effect:non-scaling-stroke}
+.mark{fill:var(--paper);stroke:var(--ink);stroke-width:1.5;vector-effect:non-scaling-stroke}
+</style>

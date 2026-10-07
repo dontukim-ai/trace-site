@@ -1,0 +1,130 @@
+{
+ "tickers": {
+  "APP": {
+   "name": "앱러빈",
+   "sector": "광고테크"
+  },
+  "ON": {
+   "name": "온세미컨덕터",
+   "sector": "반도체"
+  },
+  "GFS": {
+   "name": "글로벌파운드리스",
+   "sector": "반도체"
+  },
+  "MTSI": {
+   "name": "M/A-컴 테크놀로지",
+   "sector": "반도체"
+  },
+  "STRL": {
+   "name": "스털링 인프라",
+   "sector": "건설·엔지니어링"
+  },
+  "VIAV": {
+   "name": "비아비 솔루션스",
+   "sector": "통신장비"
+  },
+  "RMBS": {
+   "name": "램버스",
+   "sector": "반도체"
+  },
+  "LGN": {
+   "name": "레전스",
+   "sector": "건설·엔지니어링"
+  },
+  "DY": {
+   "name": "다이콤 인더스트리스",
+   "sector": "건설·엔지니어링"
+  },
+  "IPGP": {
+   "name": "IPG 포토닉스",
+   "sector": "산업용 레이저"
+  },
+  "ICHR": {
+   "name": "아이커 홀딩스",
+   "sector": ""
+  },
+  "ALAB": {
+   "name": "아스테라 랩스",
+   "sector": "반도체"
+  },
+  "CRDO": {
+   "name": "크레도 테크놀로지",
+   "sector": "반도체"
+  },
+  "CW": {
+   "name": "커티스라이트",
+   "sector": "방산·원자력 부품"
+  },
+  "GNRC": {
+   "name": "제네락",
+   "sector": "발전기"
+  },
+  "COCO": {
+   "name": "비타코코",
+   "sector": "음료"
+  },
+  "GLW": {
+   "name": "코닝",
+   "sector": "광통신"
+  },
+  "CIEN": {
+   "name": "시에나",
+   "sector": "광통신"
+  },
+  "STM": {
+   "name": "ST마이크로일렉트로닉스",
+   "sector": "반도체"
+  },
+  "AMRZ": {
+   "name": "암라이즈",
+   "sector": "건자재"
+  },
+  "MKSI": {
+   "name": "MKS",
+   "sector": "반도체"
+  },
+  "ULS": {
+   "name": "UL 솔루션스",
+   "sector": "시험·인증"
+  },
+  "LII": {
+   "name": "레녹스 인터내셔널",
+   "sector": "냉난방"
+  },
+  "ESAB": {
+   "name": "에삽",
+   "sector": ""
+  },
+  "BOOT": {
+   "name": "부트 반",
+   "sector": ""
+  },
+  "KNF": {
+   "name": "나이프 리버",
+   "sector": ""
+  },
+  "TTAM": {
+   "name": "타이탄 아메리카",
+   "sector": ""
+  },
+  "CRI": {
+   "name": "카터스",
+   "sector": ""
+  }
+ },
+ "episodes": {
+  "1": {
+   "youtube": "s13vJKW6LHs",
+   "title": "미국주식 필터 리포트 (9월 14일)"
+  },
+  "2": {
+   "youtube": "vlCxMxA5OsU",
+   "title": "미국주식 필터 리포트 (9월 21일)"
+  },
+  "3": {
+   "youtube": "1feejlq96nc",
+   "title": "9월 4주차 | 조건 통과 미국주식 16종목 · 3개월 25% 하락 후 반등 시작"
+  }
+ }
+}

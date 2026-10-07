@@ -1,0 +1,50 @@
+---
+import Base from '../layouts/Base.astro';
+import { data, korDate } from '../lib/data';
+const c = data.kronos_calibration;
+const groups = Object.entries(c.by_group).filter(([k]) => k.startsWith('live_')).sort();
+const first = data.tickers.find(t => t.kronos)?.kronos;
+---
+<Base title="Kronos Band" description="Trace 차트의 Kronos 20거래일 밴드가 무엇이고 어떻게 만들어지며 얼마나 맞는지." active="kronos">
+  <section class="top"><h1 class="serif">Kronos Band</h1></section>
+  <div class="body">
+    <section>
+      <h2>무엇인가</h2>
+      <p>Kronos는 주가 캔들(시가·고가·저가·종가·거래량)을 문장처럼 읽도록 학습된 공개 시계열 모델입니다(arXiv 2508.02739). Trace는 이 모델로 각 종목의 다음 20거래일 경로를 64번 그리고, 그 분포를 차트 오른쪽 음영으로 보여 줍니다.</p>
+      <p>음영의 진한 부분은 64개 경로 중 가운데 절반(25–75%), 옅은 부분은 5–95%가 지나간 범위입니다. 점선은 경로들의 중앙값입니다.</p>
+    </section>
+    <section>
+      <h2>무엇이 아닌가</h2>
+      <p>밴드는 확률 구간이 아닙니다. 모델이 그린 경로의 퍼짐일 뿐, "90% 확률로 이 안에 있다"는 뜻이 아닙니다. 목표가나 매수·매도 신호도 아닙니다.</p>
+    </section>
+    <section>
+      <h2>lookback 막대</h2>
+      <p>모델은 과거 몇 거래일을 보느냐(lookback)에 따라 결과가 크게 달라집니다. 크게 빠진 종목일수록 그렇습니다. 차트 끝의 세로 막대는 lookback 30·60·90일로 각각 그린 중앙값의 범위입니다. 막대가 길수록 모델의 답이 기준 기간에 민감하다는 뜻입니다. 음영은 60일 기준입니다.</p>
+    </section>
+    <section>
+      <h2>얼마나 맞나</h2>
+      {c.scored === 0 ? <p>아직 만기가 지난 밴드가 없습니다. 첫 채점은 2026년 10월 28일 전후이며, 지금 {c.pending}개의 밴드가 만기를 기다리고 있습니다.</p>
+      : !c.judgeable ? <p>지금까지 {c.scored}개가 채점됐습니다. 30개가 쌓이기 전에는 우연과 구별하기 어려워 적중률을 공개하지 않습니다.</p>
+      : <div class="tbl">
+          <div class="tr th"><span>lookback</span><span class="r">채점 수</span><span class="r">5–95% 안에 든 비율 (이상 90%)</span><span class="r">25–75% (이상 50%)</span></div>
+          {groups.map(([k, g]) => <div class="tr"><span>{k.replace('live_lb', '')}일</span><span class="r">{g.n}</span><span class="r">{(g.in90 * 100).toFixed(0)}%</span><span class="r">{(g.in50 * 100).toFixed(0)}%</span></div>)}
+        </div>}
+      <p class="fine">매 거래일 기록한 밴드는 고치거나 지우지 않고, 20거래일 뒤 실제 종가로 자동 채점합니다. 적중률이 낮게 나와도 그대로 공개합니다.</p>
+    </section>
+    <section>
+      <h2>설정</h2>
+      <p class="fine">{first ? `Kronos-${first.model} ${first.model_rev} · 코드 ${first.code_commit} · ` : ''}경로 64개 · T 1.0 · top-p 0.9 · 20거래일 · 최근 기준일 {korDate(data.asof)}</p>
+    </section>
+  </div>
+</Base>
+<style>
+.top{padding-block:40px 20px}
+h1{margin:0;font-size:40px;line-height:1;letter-spacing:-.5px}
+.body{border-top:1px solid var(--line-strong);display:flex;flex-direction:column;gap:36px;padding-top:28px;max-width:760px}
+h2{margin:0 0 10px;font-size:18px;font-weight:650}
+p{margin:0 0 10px;font-size:15px;line-height:1.7;color:var(--ink-2)}
+.fine{font-size:13px;color:var(--ink-3)}
+.tbl{border-top:1px solid var(--line-strong);margin-bottom:12px}
+.tr{display:grid;grid-template-columns:minmax(0,1fr) 80px 200px 160px;padding:12px 0;border-bottom:1px solid var(--line);font-size:15px}
+.th{font-size:12px;color:var(--ink-3)}.r{text-align:right}
+</style>

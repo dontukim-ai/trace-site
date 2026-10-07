@@ -1,0 +1,159 @@
+---
+import Base from '../../layouts/Base.astro';
+import { geometry } from '../../lib/chart';
+import { data, type Ticker, nameOf, sectorOf, pct, dir, md, video, screenLabel, lookbackLevels, korDate } from '../../lib/data';
+
+export function getStaticPaths() {
+  return data.tickers.map(t => ({ params: { ticker: t.ticker.toLowerCase() }, props: { t } }));
+}
+const { t } = Astro.props as { t: Ticker };
+const name = nameOf(t.ticker), sector = sectorOf(t.ticker), v = video(t.episode);
+const lbs = lookbackLevels(t) ?? [];
+
+// big chart
+const CW = 1168, CH = 420, PH = CH - 34, RP = 150;
+const vals = t.series.map(s => s[1]).concat(t.kronos ? [...t.kronos.band.p05, ...t.kronos.band.p95] : [], lbs.map(l => l.level));
+const lo = Math.floor((Math.min(...vals) - 2) / 20) * 20, hi = Math.ceil((Math.max(...vals) + 2) / 20) * 20;
+const g = geometry(t, CW, PH, { lo, hi, rightPad: RP });
+const ticks: number[] = []; for (let k = lo; k <= hi; k += 20) ticks.push(k);
+const N = t.series.length;
+const end = t.kronos ? t.kronos.future[t.kronos.future.length - 1] : t.series[N - 1][0];
+const marks: { i: number; t: string; strong?: boolean; a: string }[] = [{ i: 0, t: md(t.series[0][0]), a: 'start' }];
+let prevM = t.series[0][0].slice(0, 7);
+t.series.forEach(([d], i) => {
+  const m = d.slice(0, 7);
+  if (m !== prevM) { prevM = m; if (Math.abs(i - g.ei) > 5 && Math.abs(i - (N - 1)) > 5) marks.push({ i, t: md(d), a: 'middle' }); }
+});
+marks.push({ i: g.ei, t: `${md(t.entry_date)} 편입`, strong: true, a: 'middle' });
+marks.push({ i: N - 1, t: md(t.series[N - 1][0]), strong: true, a: 'middle' });
+if (t.kronos) marks.push({ i: g.T, t: md(end), a: 'end' });
+let prev = -99;
+const lbLabels = [...g.lbs].sort((a, b) => a.y - b.y).map(l => { const ty = Math.max(l.y + 4, prev + 15); prev = ty; return { ...l, ty }; });
+const st = t.screen;
+---
+<Base title={`${t.ticker} ${name}`} description={`${t.ticker}(${name})의 편입 후 흐름과 Kronos 20거래일 밴드. ${t.episode}회 방송에서 ${korDate(t.entry_date)} 편입.`} active="tracing">
+  <div class="crumb"><a href="/">Tracing</a> / {t.ticker}</div>
+  <section class="title">
+    <div class="tl">
+      <div class="nm"><h1>{t.ticker}</h1><span>{name}</span></div>
+      <span class="sub">{sector && `${sector} · `}{t.episode}회 방송 · {t.entry_date} 편입 · 편입 후 {t.days_since_entry}거래일</span>
+    </div>
+    {v && <a class="btn" href={`https://www.youtube.com/watch?v=${v.youtube}`} rel="noopener">{t.episode}회 방송 보기 ↗</a>}
+  </section>
+
+  <div class="strip">
+    <div class="cell"><span class="lab">편입 후</span><span class={`big serif ${dir(t.ret_since_entry)}`}>{pct(t.ret_since_entry)}</span></div>
+    <div class="cell"><span class="lab">편입 때 3개월 고점 대비</span><span class={`val ${dir(t.entry_vs_hi3m)}`}>{pct(t.entry_vs_hi3m)}</span></div>
+    <div class="cell"><span class="lab">지금 3개월 고점 대비</span><span class={`val ${dir(t.now_vs_hi3m)}`}>{pct(t.now_vs_hi3m)}</span></div>
+    <div class="cell"><span class="lab">편입 후 최고</span><span class={`val ${dir(t.max_since_entry)}`}>{pct(t.max_since_entry)}</span></div>
+    <div class="cell"><span class="lab">편입 후 최저</span><span class={`val ${dir(t.min_since_entry)}`}>{pct(t.min_since_entry)}</span></div>
+  </div>
+
+  <section class="sec">
+    <div class="sh"><h2>편입 전후 흐름</h2><span class="muted">편입일 종가 = 100 · 분할·배당 조정</span></div>
+    <div class="chartbox">
+    <svg viewBox={`0 -14 ${CW} ${CH + 14}`} role="img" aria-label={`${t.ticker} 편입 전후 지수, ${t.kronos ? t.kronos.origin + ' 기준 Kronos 20거래일 밴드' : ''}`}>
+      {ticks.map(k => <g><line x1="0" x2={g.PW} y1={g.y(k)} y2={g.y(k)} class={k === 100 ? 'g100' : 'g'} /><text x={g.PW + 112} y={g.y(k) + 4} class="ax">{k}</text></g>)}
+      {t.kronos && <rect x={g.lx} y="0" width={+(g.PW - g.lx).toFixed(1)} height={PH} class="fut" />}
+      <line x1={g.ex} x2={g.ex} y1="0" y2={PH} class="ent" />
+      {g.outer && <path d={g.outer} class="bo" />}
+      {g.inner && <path d={g.inner} class="bi" />}
+      {g.med && <path d={g.med} class="med" />}
+      <path d={g.pre} class="pre" />
+      <path d={g.post} class="post" />
+      {lbs.length > 0 && <line x1={g.PW + 14} x2={g.PW + 14} y1={g.by1} y2={g.by2} class="bar" />}
+      {lbLabels.map(l => <g><line x1={g.PW + 9} x2={g.PW + 19} y1={l.y} y2={l.y} class="tick" /><text x={g.PW + 26} y={l.ty} class="lbt">{l.lb}일 {pct(l.ret)}</text></g>)}
+      <rect x={g.ex - 4} y={g.ey - 4} width="8" height="8" class="mark" />
+      {marks.map(m => <text x={g.x(m.i)} y={PH + 24} text-anchor={m.a} class={m.strong ? 'xl s' : 'xl'}>{m.t}</text>)}
+    </svg>
+    </div>
+    <ul class="legend">
+      <li><svg width="22" height="8" aria-hidden="true"><line x1="0" x2="22" y1="4" y2="4" stroke="var(--chart-pre)" stroke-width="2"/></svg>편입 전</li>
+      <li><svg width="22" height="8" aria-hidden="true"><line x1="0" x2="22" y1="4" y2="4" stroke="var(--ink)" stroke-width="2.25"/></svg>편입 후</li>
+      <li><svg width="22" height="12" aria-hidden="true"><rect width="22" height="12" fill="var(--band-inner)"/></svg>Kronos 20거래일 경로 분포 (진한 곳 25–75%, 옅은 곳 5–95%)</li>
+      <li><svg width="10" height="16" aria-hidden="true"><line x1="5" x2="5" y1="2" y2="14" stroke="var(--ink)" stroke-width="3.5" stroke-linecap="round"/></svg>lookback별 중앙값 범위</li>
+    </ul>
+  </section>
+
+  <div class="two">
+    <section class="col">
+      <h2>Kronos 20거래일</h2>
+      {t.kronos ? <>
+        <p>{korDate(t.kronos.origin)} 종가 기준으로 모델이 그린 64개 경로의 분포입니다. 확률 구간이 아니며, 실제 종가와 맞았는지는 만기일({korDate(end)})부터 채점해 공개합니다.</p>
+        <div class="tbl">
+          <div class="tr th"><span>lookback</span><span class="r">20일 뒤 중앙값</span><span class="r">지수</span></div>
+          {lbs.map(l => <div class="tr"><span>{l.lb}일{l.lb === '60' && <small> 기본 표시</small>}</span><span class={`r b ${dir(l.ret)}`}>{pct(l.ret)}</span><span class="r muted">{l.level.toFixed(1)}</span></div>)}
+        </div>
+        <span class="fine">Kronos-{t.kronos.model} {t.kronos.model_rev} · 경로 64개 · T 1.0</span>
+      </> : <p>아직 Kronos 기록이 없습니다. 다음 거래일 아침에 생깁니다.</p>}
+    </section>
+    <section class="col">
+      <h2>이번 주 스크린</h2>
+      {st ? <>
+        <div class="stat"><span class={`pill ${st.result === '통과' ? 'pass' : st.result === '대기' ? 'wait' : 'out'}`}>{screenLabel(st.result)}</span><span class="muted">{korDate(st.asof)} 기준</span></div>
+        {st.result !== '통과' && <p>처음 걸린 조건: {st.stage}. {st.reasons.replace(/-/g, '−')}.</p>}
+      </> : <p>이번 주 스크린 기록이 없습니다.</p>}
+      <p>한 번 편입된 종목은 조건과 관계없이 계속 기록합니다.</p>
+      <h3>기록</h3>
+      <div class="tbl">
+        {st && <div class="tr2"><span class="muted">{st.asof}</span><span>스크린 결과 {screenLabel(st.result)}</span></div>}
+        <div class="tr2"><span class="muted">{t.entry_date}</span><span>{t.episode}회 방송에서 편입 · 3개월 고점 대비 {pct(t.entry_vs_hi3m)}</span></div>
+      </div>
+    </section>
+  </div>
+</Base>
+<style>
+.crumb{padding-top:28px;font-size:13px;color:var(--ink-3)}
+.title{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;padding-block:14px 28px}
+.tl{display:flex;flex-direction:column;gap:8px}
+.nm{display:flex;align-items:baseline;gap:12px}
+h1{margin:0;font-size:34px;font-weight:700;letter-spacing:.2px}
+.nm span{font-size:20px;color:var(--ink-2)}
+.sub{font-size:14px;color:var(--ink-3)}
+.btn{font-size:14px;font-weight:600;padding:10px 16px;border:1px solid #d9dbdf;border-radius:999px}
+.strip{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));border-top:1px solid var(--line-strong);border-bottom:1px solid var(--line)}
+.cell{display:flex;flex-direction:column;gap:8px;padding:20px 20px 22px}
+.cell:first-child{padding-left:0}.cell+.cell{border-left:1px solid var(--line)}
+.lab{font-size:13px;color:var(--ink-3)}
+.big{font-size:34px;line-height:1}.val{font-size:24px;line-height:30px;font-weight:600}
+.sec{padding-top:36px}
+.sh{display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:16px;font-size:13px}
+h2{margin:0;font-size:18px;font-weight:650}
+.chartbox{overflow-x:auto}
+.chartbox svg{display:block;width:100%;min-width:640px;height:auto;overflow:visible;font-family:var(--font-sans)}
+.g{stroke:#eeeff1}.g100{stroke:var(--chart-pre)}
+.ax{font-size:12px;fill:var(--ink-4)}
+.fut{fill:var(--paper-2)}
+.ent{stroke:var(--ink);stroke-dasharray:3 3}
+.bo{fill:var(--band-outer)}.bi{fill:var(--band-inner)}
+.med{fill:none;stroke:var(--band-median);stroke-width:1.5;stroke-dasharray:4 3}
+.pre{fill:none;stroke:var(--chart-pre);stroke-width:2}.post{fill:none;stroke:var(--ink);stroke-width:2.25}
+.bar{stroke:var(--ink);stroke-width:3.5;stroke-linecap:round}.tick{stroke:var(--ink);stroke-width:1.5}
+.lbt{font-size:12px;fill:var(--ink-2)}
+.mark{fill:var(--paper);stroke:var(--ink);stroke-width:1.75}
+.xl{font-size:12px;fill:var(--ink-3)}.xl.s{fill:var(--ink);font-weight:600}
+.legend{list-style:none;margin:0;padding:18px 0 0;display:flex;flex-wrap:wrap;gap:12px 28px;font-size:13px;color:var(--ink-3)}
+.legend li{display:flex;align-items:center;gap:8px}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:56px;padding-top:44px}
+.col{display:flex;flex-direction:column;gap:14px;min-width:0}
+.col p{margin:0;font-size:14px;line-height:1.65;color:var(--ink-2);max-width:60ch}
+h3{margin:18px 0 0;font-size:15px;font-weight:650}
+.tbl{border-top:1px solid var(--line-strong)}
+.tr{display:grid;grid-template-columns:minmax(0,1fr) 120px 120px;padding:12px 0;font-size:15px;border-bottom:1px solid var(--line)}
+.tr.th{font-size:12px;color:var(--ink-3);padding:10px 0}
+.tr small{font-size:12px;color:var(--ink-3)}
+.r{text-align:right}.b{font-weight:600}
+.tr2{display:grid;grid-template-columns:110px minmax(0,1fr);gap:8px;padding:12px 0;font-size:14px;border-bottom:1px solid var(--line)}
+.fine{font-size:12px;color:var(--ink-3)}
+.stat{display:flex;align-items:center;gap:12px;font-size:14px}
+.pill{font-size:13px;font-weight:600;padding:5px 12px;border-radius:999px}
+.pill.pass{background:var(--ink);color:var(--paper)}
+.pill.wait{box-shadow:inset 0 0 0 1px var(--ink)}
+.pill.out{background:var(--paper-3);color:var(--ink-2)}
+@media (max-width:760px){
+  .strip{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .cell:first-child{grid-column:1/-1;border-bottom:1px solid var(--line)}
+  .cell{padding:16px 12px 16px 0}.cell+.cell{border-left:0}
+  .two{grid-template-columns:1fr;gap:40px}
+}
+</style>

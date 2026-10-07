@@ -1,0 +1,80 @@
+---
+import '../styles/global.css';
+import { data, korDate } from '../lib/data';
+interface Props { title?: string; description?: string; active?: string }
+const { title, description = '미국주식 필터 리포트가 방송에서 다룬 종목을 편입일부터 매일 기록합니다.', active = '' } = Astro.props;
+const fullTitle = title ? `${title} · Trace` : 'Trace by 필터 리포트';
+const nav = [
+  { href: '/', label: 'Tracing', key: 'tracing' },
+  { href: '/changes/', label: '변경 기록', key: 'changes' },
+  { href: '/episodes/', label: '회차', key: 'episodes' },
+  { href: '/kronos/', label: 'Kronos Band', key: 'kronos' },
+  { href: '/criteria/', label: '조건과 기준', key: 'criteria' },
+];
+const yt = 'https://www.youtube.com/@us_stock_filter_report';
+---
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>{fullTitle}</title>
+<meta name="description" content={description}>
+<link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)}>
+<meta property="og:title" content={fullTitle}>
+<meta property="og:description" content={description}>
+<meta property="og:type" content="website">
+<link rel="preload" href="/fonts/PretendardVariable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif&display=swap">
+</head>
+<body>
+<header class="hd">
+  <div class="wrap hd-in">
+    <a href="/" class="brand"><span class="serif wm">Trace</span><span class="by">by 필터 리포트</span></a>
+    <nav class="nav" aria-label="주요 메뉴">
+      {nav.map(n => <a href={n.href} aria-current={active === n.key ? 'page' : undefined}>{n.label}</a>)}
+    </nav>
+    <div class="side">
+      <span>{korDate(data.asof)} 미국 종가</span>
+      <a href={yt} class="yt" rel="noopener">YouTube ↗</a>
+    </div>
+    <details class="menu">
+      <summary aria-label="메뉴 열기"><svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M3 6h16M3 11h16M3 16h16" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" fill="none"/></svg></summary>
+      <div class="menu-panel">
+        {nav.map(n => <a href={n.href} aria-current={active === n.key ? 'page' : undefined}>{n.label}</a>)}
+        <a href={yt} rel="noopener">YouTube ↗</a>
+        <span class="muted">{korDate(data.asof)} 미국 종가</span>
+      </div>
+    </details>
+  </div>
+</header>
+<main class="wrap"><slot /></main>
+<footer class="wrap ft">
+  <p>리서치 기록이며 투자 권유가 아닙니다. 가격 원자료는 공개하지 않고 편입일 종가 = 100 지수와 비율로만 표시합니다. 가격 출처: Yahoo Finance, 매 거래일 장 마감 후 갱신.</p>
+</footer>
+</body>
+</html>
+<style>
+.hd{border-bottom:1px solid var(--line)}
+.hd-in{display:flex;align-items:center;gap:48px;height:88px}
+.brand{display:flex;align-items:baseline;gap:10px}
+.wm{font-size:36px;line-height:1;letter-spacing:-.5px}
+.by{font-size:12px;color:var(--ink-3)}
+.nav{display:flex;gap:28px;font-size:14px;flex-grow:1;align-self:stretch}
+.nav a{display:flex;align-items:center;color:var(--ink-3);border-bottom:2px solid transparent;margin-bottom:-1px}
+.nav a[aria-current=page]{color:var(--ink);font-weight:600;border-bottom-color:var(--ink)}
+.side{display:flex;gap:20px;align-items:center;font-size:13px;color:var(--ink-3)}
+.yt{color:var(--ink);font-weight:600}
+.menu{display:none;margin-left:auto}
+.menu summary{list-style:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.menu summary::-webkit-details-marker{display:none}
+.menu-panel{position:absolute;left:0;right:0;top:60px;background:var(--paper);border-bottom:1px solid var(--line);display:flex;flex-direction:column;padding:8px var(--gutter) 16px;z-index:10}
+.menu-panel a{padding:12px 0;font-size:16px;border-bottom:1px solid var(--line)}
+.menu-panel a[aria-current=page]{font-weight:600}
+.menu-panel span{padding-top:12px;font-size:13px}
+.ft{padding-block:56px 64px;font-size:12px;color:var(--ink-3);line-height:1.6}
+.ft p{margin:0;max-width:62ch}
+@media (max-width:960px){.nav,.side{display:none}.menu{display:block}.hd-in{height:60px;position:relative}.wm{font-size:28px}.hd{position:relative}}
+</style>

@@ -1,0 +1,67 @@
+---
+import Base from '../layouts/Base.astro';
+import { data, korDate } from '../lib/data';
+const f = data.screen_funnel;
+const steps = f ? [
+  ['시가총액 $3억 이상 미국 상장', f.F0_universe],
+  ['3개월 하락 (Finviz)', f.F1_13w_down],
+  ['목표가 +20% 이상 (Finviz)', f.F2_target20],
+  ['시가총액 $10억 이상', f.after_Y1],
+  ['3개월 −25% 이상 하락', f.after_Y2],
+  ['애널리스트 7명 이상', f.after_Y3],
+  ['평균 목표가 여력 +20% 초과', f.after_Y4],
+  ['재무건전성 6항목 무결점', f.after_Y5],
+  ['1주 상승 (통과)', f.after_Y6],
+] as [string, number][] : [];
+const max = steps.length ? steps[0][1] : 1;
+---
+<Base title="조건과 기준" description="Trace가 종목을 고르는 여섯 조건과 재무건전성 기준, 이번 주 단계별 잔존 수." active="criteria">
+  <section class="top"><h1 class="serif">조건과 기준</h1></section>
+  <div class="grid">
+    <section>
+      <h2>여섯 조건</h2>
+      <ol class="cond">
+        <li><b>시가총액 $10억 이상</b></li>
+        <li><b>3개월 −25% 이상 하락</b><span>91일 전 가장 가까운 거래일 종가 대비</span></li>
+        <li><b>최근 1주 상승</b><span>이것만 못 넘으면 '대기'</span></li>
+        <li><b>평균 목표가 여력 +20% 초과</b></li>
+        <li><b>재무건전성 6항목 무결점</b></li>
+        <li><b>애널리스트 7명 이상</b><span>소수 의견이 평균을 왜곡하지 않도록</span></li>
+      </ol>
+      <h2>재무건전성 6항목</h2>
+      <ul class="fin">
+        <li>유동비율 1.2 이상</li>
+        <li>EBITDA 흑자, 순부채/EBITDA 3.5배 이하 (순현금이면 통과)</li>
+        <li>영업현금흐름 흑자</li>
+        <li>부채비율 200% 이하</li>
+        <li>자본잠식 아님</li>
+        <li>순부채라면 이자보상배율 3배 이상</li>
+      </ul>
+      <p class="fine">조건을 통과한 종목이 적어도 기준을 낮추지 않습니다. 매주 토요일(한국 시간) 미국 종가 기준으로 다시 거릅니다.</p>
+    </section>
+    {f && <section>
+      <h2>이번 주 단계별 잔존 수 <span class="muted asof">{korDate(f.asof)} 종가</span></h2>
+      <ol class="fun">
+        {steps.map(([l, n]) => <li><span class="l">{l}</span><span class="bar"><i style={`width:${Math.max(0.6, Math.sqrt(n / max) * 100).toFixed(1)}%`}></i></span><span class="n">{n.toLocaleString('ko-KR')}</span></li>)}
+      </ol>
+      <p class="fine">막대 길이는 제곱근 축척입니다. 대기(1주 상승만 미충족) {f.wait}종목.</p>
+    </section>}
+  </div>
+</Base>
+<style>
+.top{padding-block:40px 20px}
+h1{margin:0;font-size:40px;line-height:1;letter-spacing:-.5px}
+.grid{border-top:1px solid var(--line-strong);display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:56px;padding-top:28px}
+h2{margin:0 0 12px;font-size:18px;font-weight:650}
+.asof{font-size:13px;font-weight:400;margin-left:8px}
+.cond{margin:0 0 32px;padding-left:20px;display:flex;flex-direction:column;gap:10px;font-size:15px}
+.cond span{display:block;font-size:13px;color:var(--ink-3);margin-top:2px}
+.cond b{font-weight:600}
+.fin{margin:0 0 20px;padding-left:18px;display:flex;flex-direction:column;gap:8px;font-size:14px;color:var(--ink-2)}
+.fine{font-size:13px;color:var(--ink-3);line-height:1.6;margin:0}
+.fun{list-style:none;margin:0 0 14px;padding:0}
+.fun li{display:grid;grid-template-columns:minmax(0,190px) minmax(0,1fr) 56px;gap:12px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);font-size:13px}
+.l{color:var(--ink-2)}.n{text-align:right;font-weight:600}
+.bar{height:8px;background:var(--paper-3)}.bar i{display:block;height:100%;background:var(--ink)}
+@media (max-width:760px){.grid{grid-template-columns:1fr;gap:40px}}
+</style>
