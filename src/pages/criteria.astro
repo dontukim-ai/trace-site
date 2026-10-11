@@ -2,7 +2,8 @@
 import Base from '../layouts/Base.astro';
 import { data, korDate, HOLD_DAYS } from '../lib/data';
 const f = data.screen_funnel;
-const steps = f ? [
+// criteria v1.0 깔때기는 steps 로 온다. 그 전 형식(v0)은 옛 키로 읽는다.
+const steps = f ? (f.steps ? f.steps.map((s: { label: string; n: number }) => [s.label, s.n]) : [
   ['시가총액 $3억 이상 미국 상장', f.F0_universe],
   ['3개월 하락 (Finviz)', f.F1_13w_down],
   ['목표가 +20% 이상 (Finviz)', f.F2_target20],
@@ -12,32 +13,31 @@ const steps = f ? [
   ['평균 목표가 여력 +20% 초과', f.after_Y4],
   ['재무건전성 6항목 무결점', f.after_Y5],
   ['1주 상승 (통과)', f.after_Y6],
-] as [string, number][] : [];
+]) as [string, number][] : [];
 const max = steps.length ? steps[0][1] : 1;
 ---
-<Base title="조건과 기준" description="Trace가 종목을 고르는 여섯 조건과 재무건전성 기준, 이번 주 단계별 잔존 수." active="criteria">
+<Base title="조건과 기준" description="Trace가 종목을 고르는 여섯 조건과 재무 5항목, 이번 주 단계별 잔존 수." active="criteria">
   <section class="top"><h1 class="serif">조건과 기준</h1></section>
   <div class="grid">
     <section>
       <h2>여섯 조건</h2>
       <ol class="cond">
         <li><b>시가총액 $10억 이상</b></li>
-        <li><b>3개월 −25% 이상 하락</b><span>91일 전 가장 가까운 거래일 종가 대비</span></li>
-        <li><b>최근 1주 상승</b><span>이것만 못 넘으면 '대기'</span></li>
-        <li><b>평균 목표가 여력 +20% 초과</b></li>
-        <li><b>재무건전성 6항목 무결점</b></li>
+        <li><b>3개월 −25% 이하 하락</b><span>91일 전(휴장이면 그 직전 거래일) 종가 대비</span></li>
+        <li><b>최근 1주 상승</b><span>7일 전 종가 대비. 이것만 못 넘으면 '대기'</span></li>
+        <li><b>평균 목표가 여력 +20% 이상</b></li>
         <li><b>애널리스트 7명 이상</b><span>소수 의견이 평균을 왜곡하지 않도록</span></li>
+        <li><b>재무 5항목 모두 통과</b></li>
       </ol>
-      <h2>재무건전성 6항목</h2>
+      <h2>재무 5항목</h2>
       <ul class="fin">
-        <li>유동비율 1.2 이상</li>
-        <li>EBITDA 흑자, 순부채/EBITDA 3.5배 이하 (순현금이면 통과)</li>
-        <li>영업현금흐름 흑자</li>
-        <li>부채비율 200% 이하</li>
-        <li>자본잠식 아님</li>
-        <li>순부채라면 이자보상배율 3배 이상</li>
+        <li>GAAP 영업이익 흑자</li>
+        <li>잉여현금흐름(영업현금흐름 − 유형자산 취득) 플러스</li>
+        <li>유동비율 1배 이상</li>
+        <li>이자보상배율(영업이익 ÷ 이자비용) 3배 이상</li>
+        <li>부채비율(비유동 + 유동 장기차입금, 리스 제외 ÷ 자기자본) 200% 이하. 자기자본이 마이너스면 탈락</li>
       </ul>
-      <p class="fine">조건을 통과한 종목이 적어도 기준을 낮추지 않습니다. 매주 토요일(한국 시간) 미국 종가 기준으로 다시 거릅니다.</p>
+      <p class="fine">재무는 SEC 공시(XBRL)의 최근 4개 분기 합산으로 계산하고, 공시로 확인할 수 없는 항목이 있으면 탈락으로 봅니다. 조건을 통과한 종목이 적어도 기준을 낮추지 않습니다. 매주 토요일(한국 시간) 미국 종가 기준으로 다시 거릅니다.</p>
       <h2 class="gap">기록 기간</h2>
       <ul class="fin">
         <li>편입 후 {HOLD_DAYS}거래일(약 6개월) 동안 조건과 관계없이 매일 기록합니다.</li>
