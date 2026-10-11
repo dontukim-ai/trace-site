@@ -1,6 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
-import { data, nameOf, pct, dir, video, korDate } from '../lib/data';
+import { data, nameOf, flagOf, pct, dir, video, korDate } from '../lib/data';
 const by = new Map(data.tickers.map(t => [t.ticker, t]));
 const eps = [...data.episodes].sort((a, b) => b.episode - a.episode).map(e => {
   const ts = e.tickers.map(k => by.get(k)!).filter(Boolean).sort((a, b) => b.ret_since_entry - a.ret_since_entry);
@@ -21,7 +21,7 @@ const eps = [...data.episodes].sort((a, b) => b.episode - a.episode).map(e => {
         {e.v && <a class="btn" href={`https://www.youtube.com/watch?v=${e.v.youtube}`} rel="noopener">방송 보기 ↗</a>}
       </div>
       <ul class="tks">
-        {e.ts.map(t => <li><a href={`/t/${t.ticker.toLowerCase()}/`}><span class="tk">{t.ticker}</span><span class="nm">{nameOf(t.ticker)}</span><span class={`r ${dir(t.ret_since_entry)}`}>{pct(t.ret_since_entry)}</span></a></li>)}
+        {e.ts.map(t => <li><a href={`/t/${t.ticker.toLowerCase()}/`}><span class="tk">{t.ticker}</span><span class="nm">{nameOf(t.ticker)}{flagOf(t.ticker) && <span class="flag" title={flagOf(t.ticker)!.reason}> · {flagOf(t.ticker)!.label}</span>}</span><span class={`r ${dir(t.ret_since_entry)}`}>{pct(t.ret_since_entry)}</span></a></li>)}
       </ul>
     </section>
   ))}
@@ -38,6 +38,7 @@ h1{margin:0;font-size:34px;line-height:1.1;letter-spacing:-.4px}
 .tks{list-style:none;margin:20px 0 0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:40px}
 .tks a{display:grid;grid-template-columns:64px minmax(0,1fr) auto;gap:12px;align-items:baseline;padding:12px 0;border-bottom:1px solid var(--line);font-size:15px}
 .tk{font-weight:650}.nm{color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.r{font-weight:600}
+.flag{font-size:13px;color:var(--ink-3)}
 @media (max-width:960px){.tks{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:600px){.tks{grid-template-columns:1fr}}
 </style>

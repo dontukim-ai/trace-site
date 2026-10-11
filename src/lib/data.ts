@@ -23,11 +23,13 @@ export const data = trace as unknown as {
   screen_funnel: Record<string, any> | null;
 };
 // trace.json 의 meta(trace-data/data/meta.json)를 우선 쓰고, 없으면 저장소의 meta.json 을 쓴다.
-const M = ((trace as any).meta ?? meta) as { tickers: Record<string, { name: string; sector: string; about?: string }>; episodes: Record<string, { youtube: string; title: string }> };
+const M = ((trace as any).meta ?? meta) as { tickers: Record<string, { name: string; sector: string; about?: string; flag?: string; flag_reason?: string }>; episodes: Record<string, { youtube: string; title: string }> };
 
 export const nameOf = (t: string) => M.tickers[t]?.name ?? '';
 export const sectorOf = (t: string) => M.tickers[t]?.sector ?? '';
 export const aboutOf = (t: string) => M.tickers[t]?.about ?? '';
+/** 사용자가 정한 표시 (예: 정본 기준 탈락). 편입일·편입가와 기록은 그대로 둔다 */
+export const flagOf = (t: string) => { const m = M.tickers[t]; return m?.flag ? { label: m.flag, reason: m.flag_reason ?? '' } : undefined; };
 /** 영상 ID가 아직 없는 회차(방송 전)는 undefined */
 export const video = (ep: number) => { const v = M.episodes[String(ep)]; return v?.youtube ? v : undefined; };
 
