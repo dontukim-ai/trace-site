@@ -1,7 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
 import { geometry } from '../../lib/chart';
-import { data, type Ticker, nameOf, sectorOf, aboutOf, flagOf, fundParts, pct, dir, md, video, screenLabel, lookbackLevels, korDate, isEnded, HOLD_DAYS } from '../../lib/data';
+import { data, type Ticker, nameOf, sectorOf, aboutOf, flagOf, fundParts, pct, dir, md, video, videoLink, mmss, appearancesOf, episodeDate, screenLabel, lookbackLevels, korDate, isEnded, HOLD_DAYS } from '../../lib/data';
 
 export function getStaticPaths() {
   return data.tickers.map(t => ({ params: { ticker: t.ticker.toLowerCase() }, props: { t } }));
@@ -9,6 +9,7 @@ export function getStaticPaths() {
 const { t } = Astro.props as { t: Ticker };
 const name = nameOf(t.ticker), sector = sectorOf(t.ticker), v = video(t.episode);
 const lbs = lookbackLevels(t) ?? [];
+const eps = appearancesOf(t).map(ep => ({ ep, date: episodeDate(ep), v: videoLink(ep, t.ticker), first: ep === t.episode }));
 const about = aboutOf(t.ticker), fin = fundParts(t.fundamentals);
 const ended = isEnded(t) && t.exit_date;
 const flag = flagOf(t.ticker);
@@ -34,7 +35,7 @@ let prev = -99;
 const lbLabels = [...g.lbs].sort((a, b) => a.y - b.y).map(l => { const ty = Math.max(l.y + 4, prev + 15); prev = ty; return { ...l, ty }; });
 const st = t.screen;
 ---
-<Base title={`${t.ticker} ${name}`} description={`${t.ticker}(${name})의 편입 후 흐름과 Kronos 20거래일 밴드. ${t.episode}회 방송에서 ${korDate(t.entry_date)} 편입.`} active="tracing">
+<Base title={`${t.ticker} ${name}`} image={`/og/${t.ticker.toLowerCase()}.png`} description={`${name ? `${name}(${t.ticker})` : t.ticker} ${t.entry_date} 편입 이후 매일 주가 기록. 미국주식 필터 리포트 ${t.episode}회 방송 종목, 편입 후 ${pct(t.ret_since_entry)}(${korDate(data.asof)} 미국 종가 기준). 편입일 종가 = 100 지수와 Kronos 20거래일 밴드.`} active="tracing">
   <div class="crumb"><a href="/">Tracing</a> / {t.ticker}</div>
   <section class="title">
     <div class="tl">
@@ -85,6 +86,20 @@ const st = t.screen;
     </ul>
   </section>
 
+  <section class="sec eps">
+    <div class="sh"><h2>이 종목을 다룬 회차</h2><span class="muted">미국주식 필터 리포트 · {eps.length}개 회차</span></div>
+    <ul class="epl">
+      {eps.map(e => (
+        <li>
+          <span class="en serif">{e.ep}회</span>
+          <span class="ed">{e.date && `${korDate(e.date)} 종가 기준`} · {e.first ? '첫 편입' : '다시 조건 통과'}</span>
+          <span class="et">{e.v ? e.v.title : '영상 공개 전'}</span>
+          {e.v ? <a class="go" href={e.v.url} rel="noopener">{e.v.at ? `${mmss(e.v.at)}부터 보기` : '영상 보기'} ↗</a> : <span class="go off">공개 후 연결</span>}
+        </li>
+      ))}
+    </ul>
+  </section>
+
   <div class="two">
     <section class="col">
       <h2>Kronos 20거래일</h2>
@@ -125,6 +140,14 @@ h1{margin:0;font-size:34px;font-weight:700;letter-spacing:.2px}
 .about p{margin:0;font-size:15px;line-height:1.6;color:var(--ink-2)}
 .about .fin{font-size:14px}
 .about .src{font-size:12px;color:var(--ink-4);margin-left:6px;white-space:nowrap}
+.eps .epl{list-style:none;margin:0;padding:0;border-top:1px solid var(--line-strong)}
+.epl li{display:grid;grid-template-columns:56px 190px minmax(0,1fr) auto;gap:16px;align-items:baseline;padding:14px 0;border-bottom:1px solid var(--line);font-size:14px}
+.en{font-size:20px}
+.ed{color:var(--ink-3);font-size:13px}
+.et{color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.go{font-weight:600;white-space:nowrap}
+.go.off{font-weight:400;color:var(--ink-4)}
+@media (max-width:760px){.epl li{grid-template-columns:48px minmax(0,1fr) auto;row-gap:2px}.ed{grid-column:2/4;grid-row:2}.et{grid-column:2;grid-row:1}.go{grid-column:3;grid-row:1}}
 .btn{font-size:14px;font-weight:600;padding:10px 16px;border:1px solid #d9dbdf;border-radius:999px}
 .strip{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));border-top:1px solid var(--line-strong);border-bottom:1px solid var(--line)}
 .cell{display:flex;flex-direction:column;gap:8px;padding:20px 20px 22px}
