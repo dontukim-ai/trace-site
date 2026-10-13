@@ -1,0 +1,77 @@
+---
+import Base from '../layouts/Base.astro';
+import { company } from '../lib/company';
+const effective = '2026년 10월 13일';
+---
+<Base title="개인정보처리방침" description="Trace(filterreport.co.kr)의 개인정보 처리 방침." active="">
+  <section class="top"><h1 class="serif">개인정보처리방침</h1><span class="muted">시행일 {effective}</span></section>
+  <article class="doc">
+    <p>{company.name}(이하 '회사')는 Trace(filterreport.co.kr)를 운영하며 「개인정보 보호법」에 따라 이용자의 개인정보를 보호합니다.</p>
+
+    <h2>1. 처리하는 개인정보</h2>
+    <ul>
+      <li>회원가입·입력 양식이 없으며, 회사가 이용자에게서 직접 수집하는 개인정보는 없습니다.</li>
+      <li>사이트에 접속하면 전송·보안을 위해 접속 기록(IP 주소, 브라우저·기기 정보, 접속 일시, 요청한 주소)이 자동으로 처리됩니다.</li>
+      <li>방문 통계는 쿠키를 쓰지 않는 Cloudflare Web Analytics로 집계하며, 개인을 식별할 수 없는 통계만 봅니다.</li>
+      <li>이용자가 문의 메일을 보내면 이메일 주소와 메일 내용을 답변 목적으로 처리합니다.</li>
+    </ul>
+
+    <h2>2. 처리 목적</h2>
+    <p>사이트 제공과 안정적인 운영, 보안(공격·부정 접속 차단), 방문 규모 파악, 문의 답변에만 씁니다.</p>
+
+    <h2>3. 보유 기간과 파기</h2>
+    <ul>
+      <li>회사가 직접 보관하는 접속 기록은 없습니다. 접속 기록은 아래 수탁자의 정책에 따라 보관 후 삭제됩니다.</li>
+      <li>문의 메일은 답변이 끝나면 1년 안에 삭제합니다. 다른 법령이 보관을 요구하면 그 기간 동안 보관합니다.</li>
+    </ul>
+
+    <h2>4. 제3자 제공</h2>
+    <p>개인정보를 제3자에게 제공하지 않습니다. 법령에 근거가 있거나 수사기관이 적법한 절차로 요구하는 경우는 예외입니다.</p>
+
+    <h2>5. 처리 위탁과 국외 이전</h2>
+    <div class="tbl">
+      <div class="tr th"><span>받는 자 (국가)</span><span>위탁 업무</span><span>이전 항목 · 방법</span></div>
+      <div class="tr"><span>Cloudflare, Inc. (미국)</span><span>사이트 호스팅·전송, 보안, 방문 통계, 문의 메일 전달</span><span>접속 기록, 문의 메일 · 접속하거나 메일을 보낼 때 네트워크로 전송</span></div>
+      <div class="tr"><span>Google LLC (미국)</span><span>문의 메일 수신·보관</span><span>문의자 이메일 주소와 메일 내용 · 메일 전달 시 네트워크로 전송</span></div>
+    </div>
+    <p class="fine">보유 기간은 위 3항과 각 회사의 정책에 따릅니다. 국외 이전을 원하지 않으면 사이트 이용이나 문의 메일 발송을 하지 않을 수 있으며, 이 경우 사이트를 볼 수 없거나 답변을 받을 수 없습니다.</p>
+
+    <h2>6. 쿠키</h2>
+    <p>쿠키를 쓰지 않습니다. 광고처럼 쿠키를 쓰는 기능을 붙이면 이 방침을 고치고 시행 7일 전에 알립니다.</p>
+
+    <h2>7. 이용자의 권리</h2>
+    <p>이용자는 회사가 처리하는 자신의 개인정보에 대해 열람·정정·삭제·처리정지를 요구할 수 있습니다. 아래 보호책임자에게 메일로 요청하면 지체 없이 처리합니다.</p>
+
+    <h2>8. 안전성 확보 조치</h2>
+    <p>모든 접속을 HTTPS로 암호화하고, 개인정보를 필요한 만큼만 처리하며, 관리 권한은 운영자에게만 둡니다.</p>
+
+    <h2>9. 개인정보 보호책임자</h2>
+    <p>{company.ceo} (대표) · <a href={`mailto:${company.email}`}>{company.email}</a></p>
+
+    <h2>10. 권익침해 구제</h2>
+    <ul>
+      <li>개인정보침해신고센터: privacy.kisa.or.kr, 국번 없이 118</li>
+      <li>개인정보분쟁조정위원회: www.kopico.go.kr, 1833-6972</li>
+      <li>대검찰청: www.spo.go.kr, 국번 없이 1301</li>
+      <li>경찰청: ecrm.police.go.kr, 국번 없이 182</li>
+    </ul>
+
+    <h2>11. 방침의 변경</h2>
+    <p>이 방침은 {effective}부터 시행합니다. 내용을 바꾸면 시행 7일 전에 이 페이지로 알립니다.</p>
+  </article>
+</Base>
+<style>
+.top{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;padding-block:40px 20px;font-size:13px}
+h1{margin:0;font-size:34px;line-height:1.1;letter-spacing:-.4px}
+.doc{border-top:1px solid var(--line-strong);padding-top:20px;max-width:76ch}
+h2{margin:28px 0 10px;font-size:17px;font-weight:650}
+p,li{font-size:15px;line-height:1.75;color:var(--ink-2)}
+p{margin:0}
+ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
+a{text-decoration:underline;text-underline-offset:3px}
+.tbl{border-top:1px solid var(--line-strong);margin-bottom:10px}
+.tr{display:grid;grid-template-columns:180px minmax(0,1fr) minmax(0,1.2fr);gap:12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px;color:var(--ink-2);line-height:1.6}
+.tr.th{font-size:12px;color:var(--ink-3)}
+.fine{font-size:13px;color:var(--ink-3)}
+@media (max-width:760px){.tr{grid-template-columns:1fr;gap:2px}.tr.th{display:none}}
+</style>

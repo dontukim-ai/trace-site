@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import { data, korDate } from '../lib/data';
+import { company } from '../lib/company';
 interface Props { title?: string; description?: string; active?: string }
 const { title, description = '미국주식 필터 리포트가 방송에서 다룬 종목을 편입일부터 매일 기록합니다.', active = '' } = Astro.props;
 const fullTitle = title ? `${title} · Trace` : 'Trace by 필터 리포트';
@@ -64,6 +65,13 @@ const yt = 'https://www.youtube.com/@us_stock_filter_report';
 <main class="wrap"><slot /></main>
 <footer class="wrap ft">
   <p>리서치 기록이며 투자 권유가 아닙니다. 가격 원자료는 공개하지 않고 편입일 종가 = 100 지수와 비율로만 표시합니다. 가격 출처: Yahoo Finance, 매 거래일 장 마감 후 갱신.</p>
+  <nav class="ft-links" aria-label="정책">
+    <a href="/notice/">투자 유의사항</a><a href="/privacy/"><b>개인정보처리방침</b></a><a href={`mailto:${company.email}`}>문의 {company.email}</a>
+  </nav>
+  <p class="biz">
+    <span>{company.name}</span><span>대표 {company.ceo}</span><span>사업자등록번호 {company.brn}</span><span>{company.address}</span>
+  </p>
+  <p class="biz">© {new Date().getFullYear()} {company.nameEn}</p>
 </footer>
 </body>
 </html>
@@ -87,5 +95,9 @@ const yt = 'https://www.youtube.com/@us_stock_filter_report';
 .menu-panel span{padding-top:12px;font-size:13px}
 .ft{padding-block:56px 64px;font-size:12px;color:var(--ink-3);line-height:1.6}
 .ft p{margin:0}
+.ft-links{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:18px;font-size:13px}
+.ft-links a{color:var(--ink-2)}
+.ft-links b{font-weight:600;color:var(--ink)}
+.biz{display:flex;flex-wrap:wrap;gap:2px 14px;margin-top:10px !important;color:var(--ink-4)}
 @media (max-width:960px){.nav,.side{display:none}.menu{display:block}.hd-in{height:60px;position:relative;align-items:center;padding-top:0}.brand{padding-bottom:0}.wm{font-size:26px}.hd{position:relative}}
 </style>
