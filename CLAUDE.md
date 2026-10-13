@@ -14,7 +14,7 @@ Trace by 필터 리포트 공개 사이트(Astro 5, 정적 사이트)다. 데이
 
 - `main`: 코드 원본.
 - **`claude/live`**: Cloudflare Pages 운영 브랜치. `main`의 코드에 매일 갱신되는 `src/data/trace.json`을 더한 것이다.
-- Cloudflare 프로젝트 `trace-site`는 https://trace-site-bjb.pages.dev 이고, 빌드 설정은 아래와 같다.
+- Cloudflare 프로젝트 `trace-site`는 https://trace-site-bjb.pages.dev 이고, 운영 도메인은 https://filterreport.co.kr 이다(가비아 등록, 네임서버는 Cloudflare). 빌드 설정은 아래와 같다.
   - 빌드 명령: `npm run build`
   - 출력 폴더: `dist`
   - 환경 변수: `NODE_VERSION=22`
@@ -24,7 +24,7 @@ Trace by 필터 리포트 공개 사이트(Astro 5, 정적 사이트)다. 데이
   2. 같은 수정이 `main`에도 들어가야 한다. 그러지 않으면 다음 병합 때 충돌하거나 수정이 사라질 수 있다. 사용자에게 `claude/live` → `main` 반영을 요청한다. GitHub에서 PR을 만들어 병합하거나, 해당 파일을 업로드하면 된다.
   3. `src/data/trace.json`은 커밋 대상에서 신경 쓰지 않는다. 루틴이 관리한다.
 - `public/_headers`: `X-Robots-Tag: noindex`로 검색 노출을 막고 있다. **정식 출시(E1) 때 삭제한다.**
-- `astro.config.mjs`의 `site`는 자리표시자(`https://example.com`)다. 도메인을 정하면 바꾼다.
+- `astro.config.mjs`의 `site`는 `https://filterreport.co.kr`이다. canonical 주소에 쓰인다.
 
 ## 구조
 
