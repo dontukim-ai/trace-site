@@ -3,7 +3,7 @@ import meta from '../data/meta.json';
 
 export type Band = { p05: number[]; p25: number[]; p50: number[]; p75: number[]; p95: number[] };
 export type Ticker = {
-  ticker: string; episode: number; entry_date: string; status: string; exit_date?: string | null;
+  ticker: string; episode: number; entry_date: string; status: string; exit_date?: string | null; appearances?: number[];
   ret_since_entry: number; hi3m_date: string; entry_vs_hi3m: number; now_vs_hi3m: number;
   max_since_entry: number; min_since_entry: number; days_since_entry: number;
   series: [string, number][];
@@ -23,7 +23,7 @@ export const data = trace as unknown as {
   screen_funnel: Record<string, any> | null;
 };
 // trace.json 의 meta(trace-data/data/meta.json)를 우선 쓰고, 없으면 저장소의 meta.json 을 쓴다.
-const M = ((trace as any).meta ?? meta) as { tickers: Record<string, { name: string; sector: string; about?: string; flag?: string; flag_reason?: string }>; episodes: Record<string, { youtube: string; title: string }> };
+const M = ((trace as any).meta ?? meta) as { tickers: Record<string, { name: string; sector: string; about?: string; flag?: string; flag_reason?: string }>; episodes: Record<string, { youtube: string; title: string; chapters?: Record<string, number> }> };
 
 export const nameOf = (t: string) => M.tickers[t]?.name ?? '';
 export const sectorOf = (t: string) => M.tickers[t]?.sector ?? '';
@@ -32,6 +32,18 @@ export const aboutOf = (t: string) => M.tickers[t]?.about ?? '';
 export const flagOf = (t: string) => { const m = M.tickers[t]; return m?.flag ? { label: m.flag, reason: m.flag_reason ?? '' } : undefined; };
 /** 영상 ID가 아직 없는 회차(방송 전)는 undefined */
 export const video = (ep: number) => { const v = M.episodes[String(ep)]; return v?.youtube ? v : undefined; };
+/** 회차 영상 링크. meta 의 chapters 에 그 종목 시작 시각(초)이 있으면 그 지점부터 */
+export const videoLink = (ep: number, ticker?: string) => {
+  const v = video(ep);
+  if (!v) return undefined;
+  const at = ticker ? v.chapters?.[ticker] : undefined;
+  return { ...v, at, url: `https://www.youtube.com/watch?v=${v.youtube}${at ? `&t=${at}s` : ''}` };
+};
+/** 초 → 3:12 */
+export const mmss = (sec: number) => `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`;
+/** 종목이 다뤄진 회차 (재통과 포함, 최근 회차부터) */
+export const appearancesOf = (t: Ticker) => [...new Set([...(t.appearances ?? []), t.episode])].sort((a, b) => b - a);
+export const episodeDate = (ep: number) => data.episodes.find(e => e.episode === ep)?.date;
 
 /** +22.8% / −40.7% (true minus, one decimal) */
 export const pct = (r: number, digits = 1) => {
@@ -46,6 +58,9 @@ export const md = (d: string) => `${Number(d.slice(5, 7))}/${Number(d.slice(8, 1
 export const korDate = (d: string) => `${Number(d.slice(5, 7))}월 ${Number(d.slice(8, 10))}일`;
 /** 사이트 데이터를 만든 날 (한국 시간). 매일 아침 루틴이 갱신한다 */
 export const builtKst = new Date(Date.parse(data.generated_utc) + 9 * 3600e3).toISOString().slice(0, 10);
+/** 회차 영상 페이지 내 재생(YouTube 쿠키 가능)과 개정 개인정보처리방침 시행일. 7일 전 예고 약속에 따라 이 날 빌드부터 켜진다 */
+export const EMBED_FROM = '2026-10-20';
+export const embedOn = builtKst >= EMBED_FROM;
 
 /** 편입 후 이 거래일 수가 지나면 기록을 끝낸다 (trace-data scripts/expire_pool.py) */
 export const HOLD_DAYS = data.hold_days ?? 126;

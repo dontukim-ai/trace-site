@@ -2,11 +2,11 @@
 import '../styles/global.css';
 import { data, korDate } from '../lib/data';
 import { company } from '../lib/company';
-interface Props { title?: string; description?: string; active?: string }
-const { title, description = '미국주식 필터 리포트가 방송에서 다룬 종목을 편입일부터 매일 기록합니다.', active = '' } = Astro.props;
+interface Props { title?: string; description?: string; active?: string; image?: string }
+const { title, image = '/og.png', description = '미국주식 필터 리포트가 방송에서 다룬 종목을 편입일부터 매일 기록합니다.', active = '' } = Astro.props;
 const fullTitle = title ? `${title} · Trace` : 'Trace by 필터 리포트';
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
-const ogImage = new URL('/og.png', Astro.site).href;
+const ogImage = new URL(image, Astro.site).href;
 const nav = [
   { href: '/', label: 'Tracing', key: 'tracing' },
   { href: '/changes/', label: '변경 기록', key: 'changes' },
@@ -35,7 +35,7 @@ const yt = 'https://www.youtube.com/@us_stock_filter_report';
 <meta property="og:image" content={ogImage}>
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Trace by 필터 리포트 — 방송에서 다룬 미국 종목을 편입일부터 매일 기록">
+<meta property="og:image:alt" content={image === '/og.png' ? 'Trace by 필터 리포트 — 방송에서 다룬 미국 종목을 편입일부터 매일 기록' : `${fullTitle} — 편입 후 기록`}>
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preload" href="/fonts/PretendardVariable.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
