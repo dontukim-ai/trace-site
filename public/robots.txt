@@ -1,5 +1,3 @@
-# 검색 노출은 public/_headers 의 X-Robots-Tag: noindex 로 막는다(정식 출시 E1 때 삭제).
-# 여기서 Disallow 로 막으면 검색엔진이 noindex 를 읽지 못하므로 수집은 허용해 둔다.
 User-agent: *
 Allow: /
 

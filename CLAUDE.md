@@ -23,7 +23,7 @@ Trace by 필터 리포트 공개 사이트(Astro 5, 정적 사이트)다. 데이
   1. 코드 수정은 `claude/live`에서 작업한다. 먼저 `git pull`을 하고, 수정한 뒤 `npm run build`로 확인하고 푸시한다. 푸시하면 몇 분 안에 운영에 반영된다.
   2. 같은 수정이 `main`에도 들어가야 한다. 그러지 않으면 다음 병합 때 충돌하거나 수정이 사라질 수 있다. 사용자에게 `claude/live` → `main` 반영을 요청한다. GitHub에서 PR을 만들어 병합하거나, 해당 파일을 업로드하면 된다.
   3. `src/data/trace.json`은 커밋 대상에서 신경 쓰지 않는다. 루틴이 관리한다.
-- `public/_headers`: `X-Robots-Tag: noindex`로 검색 노출을 막고 있다. **정식 출시(E1) 때 삭제한다.**
+- 검색 노출: 2026-10-13 정식 출시(E1)로 `public/_headers`의 `noindex`를 삭제했다. 검색엔진 수집은 `public/robots.txt`와 sitemap으로 안내한다.
 - `astro.config.mjs`의 `site`는 `https://filterreport.co.kr`이다. canonical 주소에 쓰인다.
 
 ## 구조
