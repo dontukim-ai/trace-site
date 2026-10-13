@@ -1,0 +1,55 @@
+---
+import Base from '../layouts/Base.astro';
+import { company } from '../lib/company';
+import { HOLD_DAYS } from '../lib/data';
+---
+<Base title="투자 유의사항" description="Trace 기록의 성격, 결과를 읽는 방법, 데이터 출처와 이해상충 원칙." active="">
+  <section class="top"><h1 class="serif">투자 유의사항</h1></section>
+  <article class="doc">
+    <h2>1. 기록의 성격</h2>
+    <p>Trace는 유튜브 채널 '미국주식 필터 리포트'가 방송에서 다룬 미국 종목을 편입일부터 정해진 규칙으로 기록하는 리서치 기록입니다. 특정 금융투자상품의 매수·매도를 권유하지 않으며, 개인별 투자자문이나 투자일임을 제공하지 않습니다.</p>
+
+    <h2>2. 결과를 읽는 방법</h2>
+    <ul>
+      <li>수익률은 편입일 종가를 100으로 둔 과거 기록입니다. 과거 기록은 미래 수익을 보장하지 않습니다.</li>
+      <li>Kronos 밴드는 모델이 그린 경로들의 분포입니다. 확률 구간이나 예측치가 아닙니다.</li>
+      <li>투자 판단과 그 결과에 대한 책임은 투자자 본인에게 있습니다.</li>
+    </ul>
+
+    <h2>3. 기록 규칙</h2>
+    <ul>
+      <li>방송에서 조건을 통과한 종목을 그대로 편입하고, 편입 후 {HOLD_DAYS}거래일 동안 조건과 관계없이 매일 기록합니다.</li>
+      <li>가격 수준(손실·이익 폭)으로 기록을 끝내지 않습니다. 기록 종료는 매도 신호가 아닙니다.</li>
+      <li>내린 종목도 지우지 않고 남깁니다. 자세한 조건은 <a href="/criteria/">조건과 기준</a>에 있습니다.</li>
+    </ul>
+
+    <h2>4. 정확성</h2>
+    <p>데이터는 외부 출처에서 매 거래일 자동으로 받아 오며, 지연·누락·오류가 있을 수 있습니다. 오류를 발견하면 <a href={`mailto:${company.email}`}>{company.email}</a>로 알려 주세요.</p>
+
+    <h2>5. 이해상충</h2>
+    <p>운영자는 회차마다 편입 종목의 보유 여부를 기록하며, 기록 종목을 보유하지 않는 것을 기본 방침으로 합니다.</p>
+
+    <h2>6. 데이터 출처와 라이선스</h2>
+    <ul>
+      <li>가격: Yahoo Finance. 원자료(달러 가격·거래량)는 공개하지 않고 지수와 비율로만 표시합니다.</li>
+      <li>재무: 미국 SEC EDGAR 공시, Yahoo Finance</li>
+      <li>1차 선별: Finviz</li>
+      <li>Kronos 밴드: 오픈소스 시계열 모델 Kronos(shiyu-coder/Kronos)</li>
+      <li>글꼴: Pretendard, Source Serif 4 (SIL Open Font License)</li>
+      <li>각 회사명과 상표는 해당 소유자의 것입니다.</li>
+    </ul>
+
+    <h2>7. 운영자</h2>
+    <p>{company.name} · 대표 {company.ceo} · 사업자등록번호 {company.brn}<br>{company.address}<br>문의 <a href={`mailto:${company.email}`}>{company.email}</a></p>
+  </article>
+</Base>
+<style>
+.top{padding-block:40px 20px}
+h1{margin:0;font-size:34px;line-height:1.1;letter-spacing:-.4px}
+.doc{border-top:1px solid var(--line-strong);padding-top:12px;max-width:72ch}
+h2{margin:28px 0 10px;font-size:17px;font-weight:650}
+p,li{font-size:15px;line-height:1.75;color:var(--ink-2)}
+p{margin:0}
+ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
+a{text-decoration:underline;text-underline-offset:3px}
+</style>
