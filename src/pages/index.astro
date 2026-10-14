@@ -69,8 +69,11 @@ const recent = eps.slice(0, RECENT), older = eps.slice(RECENT);
     const counts = lists.map(list => {
       let n = 0;
       list.querySelectorAll<HTMLElement>('.row').forEach(row => {
-        const on = ep === 'all' || row.dataset.ep === ep;
+        // 재통과 종목은 그 회차에도 보이되, 편입 회차·편입일 기준 그대로 두고 '재통과'로 표시
+        const on = ep === 'all' || (row.dataset.eps ?? row.dataset.ep ?? '').split(' ').includes(ep);
         row.hidden = !on;
+        const re = row.querySelector<HTMLElement>('.re');
+        if (re) re.hidden = !on || ep === 'all' || row.dataset.ep === ep;
         if (on) { n++; const k = row.querySelector('.rank'); if (k) k.textContent = String(n).padStart(2, '0'); }
       });
       return n;

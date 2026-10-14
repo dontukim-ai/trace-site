@@ -1,19 +1,21 @@
 ---
 import TraceChart from './TraceChart.astro';
-import { type Ticker, nameOf, flagOf, pct, dir, mmdd, isEnded } from '../lib/data';
+import { type Ticker, nameOf, flagOf, pct, dir, mmdd, isEnded, appearancesOf } from '../lib/data';
 interface Props { t: Ticker; rank: number }
 const { t, rank } = Astro.props;
 const ended = isEnded(t) && t.exit_date;
 const flag = flagOf(t.ticker);
 // 편입일부터 마지막 기록일(종료 종목은 종료일)까지 달력일 수
+// 이 종목이 방송 통과 목록에 나온 회차 전부 (편입 회차 + 재통과 회차). 회차 필터에 쓴다
+const eps = appearancesOf(t).join(' ');
 const days = Math.round((Date.parse(t.series[t.series.length - 1][0]) - Date.parse(t.entry_date)) / 864e5);
 ---
-<a class="row" href={`/t/${t.ticker.toLowerCase()}/`} data-ep={t.episode}>
+<a class="row" href={`/t/${t.ticker.toLowerCase()}/`} data-ep={t.episode} data-eps={eps}>
   <span class="rank serif">{String(rank).padStart(2, '0')}</span>
   <span class="who">
     <span class="tk">{t.ticker}</span>
     <span class="nm">{nameOf(t.ticker)}</span>
-    <span class="meta">{t.episode}회 · {mmdd(t.entry_date)} 편입{ended && ` · ${mmdd(ended)} 종료`}{flag && <span class="flag" title={flag.reason}> · {flag.label}</span>}</span>
+    <span class="meta">{t.episode}회 · {mmdd(t.entry_date)} 편입{ended && ` · ${mmdd(ended)} 종료`}<span class="re" hidden> · 재통과</span>{flag && <span class="flag" title={flag.reason}> · {flag.label}</span>}</span>
   </span>
   <span class={`ret serif ${dir(t.ret_since_entry)}`}>{pct(t.ret_since_entry)}</span>
   <span class="chart"><TraceChart t={t} /></span>
@@ -32,6 +34,8 @@ const days = Math.round((Date.parse(t.series[t.series.length - 1][0]) - Date.par
 .nm{font-size:15px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .meta{font-size:13px;color:var(--ink-3)}
 .flag{color:var(--ink-2);font-weight:600}
+.re{color:var(--ink-2);font-weight:600}
+.re[hidden]{display:none}
 .ret{font-size:26px;line-height:1;letter-spacing:-.3px}
 .chart{min-width:0;display:block}
 .dd{display:flex;flex-direction:column;gap:8px;align-items:flex-end;font-size:15px;color:var(--ink-3)}
