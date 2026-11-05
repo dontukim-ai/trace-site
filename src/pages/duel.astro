@@ -1,0 +1,249 @@
+---
+import Base from '../layouts/Base.astro';
+import { data } from '../lib/data';
+import { duel, isSample, AIS, MIN_N, callLabel, markChar, markLabel, hitMark, rate, pctText, pctDir, mdw, md, korDay, marketLabel, shortsUrl } from '../lib/duel';
+const SHOW = 20;
+const has = !!duel && duel.records.length > 0;
+const judged = !!duel && duel.total.gpt.n + duel.total.claude.n > 0;
+const pages = new Set(data.tickers.map(t => t.ticker));
+const linkOf = (t: string, m: string) => (m === 'US' && pages.has(t) ? `/t/${t.toLowerCase()}/` : undefined);
+const updated = duel?.updated ? duel.updated.replace('T', ' ').slice(0, 16) : null;
+const wk = duel?.this_week;
+const groups = wk ? (['KR', 'US'] as const).map(m => ({ m, rows: wk.rows.filter(r => r.market === m) })).filter(g => g.rows.length) : [];
+// 주간 추이 막대 (적중률 0–100%)
+const weeks = duel?.weeks.filter(w => w.gpt.n + w.claude.n > 0).slice(-12) ?? [];
+const CW = Math.min(640, 34 + weeks.length * 110), CH = 170, PADL = 34, PADB = 26, PADT = 18;
+const slot = weeks.length ? (CW - PADL) / weeks.length : 0;
+const bw = Math.min(22, slot * 0.28);
+const y = (r: number) => PADT + (1 - r) * (CH - PADT - PADB);
+---
+<Base title="AI 대결 성적표" description="같은 자료로 그날 종가 방향을 맞히는 ChatGPT와 Claude의 예측 게임 기록. 전일 종가 대비 당일 종가로 판정합니다." active="duel">
+  <section class="top">
+    <h1 class="serif">AI 대결 성적표 <span class="vs">— ChatGPT vs Claude</span></h1>
+    <p class="lead">같은 자료로 그날 종가 방향을 맞히는 예측 게임 기록입니다. 투자 권유가 아닙니다.</p>
+    <p class="rule">판정: 전일 종가 대비 당일 종가. 소수 둘째 자리에서 반올림해 0.00%인 보합과 휴장은 무효(–)로 빼고 셉니다. 두 AI의 판단이 같아도 각각 기록합니다.</p>
+    {isSample && <p class="sample">예시 데이터입니다. 실제 기록이 아니며, 운영 사이트에는 표시되지 않습니다.</p>}
+  </section>
+
+  <section class="score" aria-label="누적 성적">
+    {AIS.map(a => {
+      const s = duel?.total[a.key];
+      return (
+        <div class="ai">
+          <div class="ai-nm">{a.label}</div>
+          <div class="ai-rate serif">{s ? rate(s) : '—'}</div>
+          <div class="ai-sub">
+            {s && s.n > 0 ? <span>{s.n}건 중 {s.hit}건 적중</span> : <span>판정 0건</span>}
+            {s && s.n > 0 && s.n < MIN_N && <span class="few">표본 적음</span>}
+          </div>
+        </div>
+      );
+    })}
+  </section>
+  {!judged && (
+    <p class="empty">{duel?.first_date ? `첫 결과는 ${korDay(duel.first_date)} 장 마감 뒤에 올라옵니다.` : '첫 결과는 첫 예측일 장 마감 뒤에 올라옵니다.'}</p>
+  )}
+  {judged && <p class="fine">누적 적중률 = 적중 ÷ 판정 수(보합·휴장 제외). 판정 {MIN_N}건 미만은 우연과 구별하기 어려워 "표본 적음"으로 표시합니다.{updated && ` 갱신 ${updated} (한국 시간)`}</p>}
+
+  {wk && (
+    <section class="sec">
+      <div class="sec-hd"><h2>이번 주</h2><span class="muted">{md(wk.days[0])} ~ {md(wk.days[4])} · 칸마다 왼쪽 ChatGPT, 오른쪽 Claude</span></div>
+      <div class="wk" role="table" aria-label="이번 주 적중 표">
+        <div class="wk-r wk-h" role="row">
+          <span role="columnheader">종목</span>
+          {wk.days.map(d => <span role="columnheader" class="c">{mdw(d)}</span>)}
+        </div>
+        {groups.map(g => (
+          <>
+            <div class="wk-g" role="row"><span role="cell">{marketLabel(g.m)}</span></div>
+            {g.rows.map(r => (
+              <div class="wk-r" role="row">
+                <span role="rowheader" class="wk-nm" title={r.name}>{r.name}</span>
+                {r.cells.map(c => c
+                  ? <span role="cell" class="c">{AIS.map(a => <b class={`mk mk-${c[a.key] === '-' ? 'v' : c[a.key]}`} title={`${a.label} ${markLabel[c[a.key]]}`}>{markChar[c[a.key]]}</b>)}</span>
+                  : <span role="cell" class="c none" aria-label="예측 없음"></span>)}
+              </div>
+            ))}
+          </>
+        ))}
+      </div>
+      <p class="fine">○ 적중 · × 빗나감 · – 무효(보합·휴장) · ? 판정 대기. 빈칸은 그날 다루지 않은 종목입니다.</p>
+    </section>
+  )}
+
+  {weeks.length > 0 && (
+    <section class="sec">
+      <div class="sec-hd"><h2>주간 적중률</h2><span class="legend"><i class="lg lg-gpt"></i>ChatGPT <i class="lg lg-claude"></i>Claude</span></div>
+      <svg class={`trend${weeks.length > 4 ? ' dense' : ''}`} style={`max-width:${CW}px`} viewBox={`0 0 ${CW} ${CH}`} role="img" aria-label={weeks.map(w => `${md(w.start)} 주 ChatGPT ${rate(w.gpt)}, Claude ${rate(w.claude)}`).join('; ')}>
+        {[0, 0.5, 1].map(v => <>
+          <line x1={PADL} x2={CW} y1={y(v)} y2={y(v)} class={v === 0.5 ? 'gl mid' : 'gl'} />
+          <text x={PADL - 6} y={y(v) + 4} class="ax" text-anchor="end">{v * 100}%</text>
+        </>)}
+        {weeks.map((w, i) => {
+          const cx = PADL + slot * (i + 0.5);
+          return <>
+            {AIS.map((a, j) => {
+              const s = w[a.key];
+              if (s.rate == null) return null;
+              const x = cx + (j === 0 ? -bw - 2 : 2);
+              return <>
+                <rect x={x} y={y(s.rate)} width={bw} height={y(0) - y(s.rate)} class={`bar bar-${a.key}`} />
+                <text x={x + bw / 2} y={y(s.rate) - 4} class="val" text-anchor="middle">{Math.round(s.rate * 100)}</text>
+              </>;
+            })}
+            <text x={cx} y={CH - 8} class="ax" text-anchor="middle">{md(w.start)} 주</text>
+          </>;
+        })}
+      </svg>
+      <p class="fine">주는 월요일부터 금요일까지입니다. 가운데 점선은 50%입니다.</p>
+    </section>
+  )}
+
+  {duel && duel.tickers.length > 0 && (
+    <section class="sec">
+      <div class="sec-hd"><h2>종목별 성적</h2></div>
+      <div class="tbl">
+        <div class="tr th"><span>종목</span>{AIS.map(a => <span class="r">{a.label}</span>)}</div>
+        {duel.tickers.map(t => {
+          const href = linkOf(t.ticker, t.market);
+          return (
+            <div class="tr">
+              <span class="tk">{href ? <a href={href}>{t.name}</a> : t.name}<small>{marketLabel(t.market)} · {t.ticker}</small></span>
+              {AIS.map(a => <span class="r"><b class="serif">{rate(t[a.key])}</b><small>{t[a.key].hit}/{t[a.key].n}</small></span>)}
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  )}
+
+  {has && (
+    <section class="sec">
+      <div class="sec-hd"><h2>최근 기록</h2><span class="muted">최근 {duel!.records.length}건{duel!.pending > 0 && ` · 판정 대기 ${duel!.pending}건`}</span></div>
+      <ol class="recs" id="recs">
+        {duel!.records.map((r, i) => (
+          <li class="rec" hidden={i >= SHOW}>
+            <div class="rec-hd">
+              <span class="rec-d">{mdw(r.date)}</span>
+              <span class="rec-nm">{r.name}<small>{marketLabel(r.market)} · {r.ticker}</small></span>
+              <span class="rec-res">
+                {r.status === 'pending' ? <span class="muted">판정 대기</span>
+                  : r.status === 'no_trade' ? <span class="muted">휴장 · 무효</span>
+                  : <><b class={`serif ${pctDir(r.pct!)}`}>{pctText(r.pct!)}</b>{r.status === 'flat' && <span class="muted"> 보합 · 무효</span>}</>}
+              </span>
+            </div>
+            <div class="rec-body">
+              {AIS.map(a => {
+                const m = hitMark(r[`${a.key}_hit`], r.status);
+                return (
+                  <div class="side">
+                    <div class="side-hd"><span class="side-ai">{a.label}</span><span class="side-call">{callLabel(r[a.key])}</span><b class={`mk mk-${m === '-' ? 'v' : m}`} title={markLabel[m]}>{markChar[m]}</b></div>
+                    <ol>{r[`${a.key}_reasons`].map(s => <li>{s}</li>)}</ol>
+                  </div>
+                );
+              })}
+            </div>
+            {r.video_id && <a class="rec-v" href={shortsUrl(r.video_id)} rel="noopener">쇼츠 보기 ↗</a>}
+          </li>
+        ))}
+      </ol>
+      {duel!.records.length > SHOW && <button type="button" class="more" id="more">더 보기 ({duel!.records.length - SHOW}건)</button>}
+    </section>
+  )}
+
+  <section class="sec foot">
+    <p class="fine">각 AI에는 같은 사실 자료와 같은 질문을 따로 주고, 오른다/내린다와 근거 세 문장을 받습니다. 판정은 매 거래일 장 마감 뒤 Yahoo Finance 종가로 자동으로 합니다(국장 다음 날 아침, 미장 한국 시간 다음 날 아침). 가격은 공개하지 않고 등락률만 표시합니다. 적중률은 지난 기록일 뿐이며, 어느 AI의 판단도 매수·매도 근거가 아닙니다.</p>
+  </section>
+</Base>
+<script>
+  const more = document.getElementById('more');
+  more?.addEventListener('click', () => {
+    document.querySelectorAll<HTMLElement>('#recs .rec[hidden]').forEach(li => (li.hidden = false));
+    more.remove();
+  });
+</script>
+<style>
+.top{padding-block:40px 24px}
+h1{margin:0;font-size:34px;line-height:1.15;letter-spacing:-.4px}
+h1 .vs{font-weight:400;color:var(--ink-3)}
+.lead{margin:12px 0 0;font-size:16px;line-height:1.6;color:var(--ink-2)}
+.rule{margin:6px 0 0;font-size:13px;line-height:1.6;color:var(--ink-3)}
+.sample{display:inline-block;margin:14px 0 0;padding:6px 12px;border:1px solid var(--line-strong);font-size:13px;font-weight:600}
+.score{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line-strong);border-bottom:1px solid var(--line)}
+.ai{padding:24px 0 22px}
+.ai + .ai{border-left:1px solid var(--line);padding-left:32px}
+.ai-nm{font-size:15px;font-weight:650}
+.ai-rate{font-size:56px;line-height:1;margin-top:14px;letter-spacing:-1px}
+.ai-sub{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;margin-top:12px;font-size:14px;color:var(--ink-2)}
+.few{font-size:12px;color:var(--ink-3);border:1px solid var(--line);border-radius:999px;padding:2px 8px}
+.empty{margin:18px 0 0;font-size:15px;color:var(--ink-2)}
+.fine{margin:12px 0 0;font-size:12px;line-height:1.6;color:var(--ink-3)}
+.sec{margin-top:56px}
+.sec-hd{display:flex;align-items:baseline;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;padding-bottom:12px;border-bottom:1px solid var(--line-strong)}
+h2{margin:0;font-size:20px;font-weight:650}
+.sec-hd .muted,.legend{font-size:13px}
+.legend{color:var(--ink-3);display:flex;align-items:center;gap:6px}
+.lg{display:inline-block;width:10px;height:10px;margin-left:8px}
+.lg-gpt,.bar-gpt{background:var(--ink-5);fill:var(--ink-5)}
+.lg-claude,.bar-claude{background:var(--ink);fill:var(--ink)}
+/* 이번 주 표 */
+.wk{font-size:14px}
+.wk-r{display:grid;grid-template-columns:minmax(0,200px) repeat(5,minmax(0,1fr));align-items:center;border-bottom:1px solid var(--line);min-height:44px}
+.wk-h{font-size:12px;color:var(--ink-3);min-height:36px}
+.wk-g{padding:14px 0 6px;font-size:12px;font-weight:600;color:var(--ink-2);border-bottom:1px solid var(--line)}
+.wk-nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:8px}
+.c{display:flex;justify-content:center;gap:10px}
+.mk{font-weight:600;font-size:16px;width:1.1em;text-align:center}
+.mk-o{color:var(--ink)}.mk-x{color:var(--ink-4)}.mk-v,.mk-\?{color:var(--ink-4);font-weight:400}
+/* 주간 추이 */
+.trend{display:block;width:100%;height:auto;margin-top:16px}
+.gl{stroke:var(--line);stroke-width:1}.gl.mid{stroke:var(--ink-4);stroke-dasharray:3 3}
+.ax{font-size:11px;fill:var(--ink-3)}.val{font-size:10px;fill:var(--ink-2)}
+/* 종목별 */
+.tbl{font-size:15px}
+.tr{display:grid;grid-template-columns:minmax(0,1fr) 160px 160px;align-items:baseline;padding:12px 0;border-bottom:1px solid var(--line)}
+.th{font-size:12px;color:var(--ink-3)}
+.r{text-align:right}
+.tr small{display:block;font-size:12px;color:var(--ink-3);margin-top:2px}
+.tk a{text-decoration:underline;text-underline-offset:3px}
+.tr b{font-size:18px;font-weight:400}
+/* 최근 기록 */
+.recs{list-style:none;margin:0;padding:0}
+.rec{padding:20px 0;border-bottom:1px solid var(--line)}
+.rec[hidden]{display:none}
+.rec-hd{display:grid;grid-template-columns:96px minmax(0,1fr) auto;gap:12px;align-items:baseline}
+.rec-d{font-size:13px;color:var(--ink-3)}
+.rec-nm{font-size:16px;font-weight:650}
+.rec-nm small{font-size:12px;font-weight:400;color:var(--ink-3);margin-left:8px}
+.rec-res{font-size:14px;text-align:right}
+.rec-res b{font-size:20px;font-weight:400}
+.rec-body{display:grid;grid-template-columns:1fr 1fr;gap:12px 32px;margin:12px 0 0 108px}
+.side-hd{display:flex;align-items:baseline;gap:8px;font-size:14px}
+.side-ai{font-weight:600}
+.side-call{color:var(--ink-2)}
+.side ol{margin:6px 0 0;padding-left:18px;font-size:13px;line-height:1.6;color:var(--ink-2)}
+.rec-v{display:inline-block;margin:10px 0 0 108px;font-size:13px;font-weight:600}
+.more{font:inherit;font-size:14px;margin-top:16px;padding:10px 18px;min-height:44px;border:1px solid var(--line-strong);border-radius:999px;background:transparent;color:var(--ink);cursor:pointer}
+.more:hover{background:var(--paper-3)}
+.foot{margin-top:40px}
+@media (max-width:760px){
+  .top{padding-block:24px 18px}
+  h1{font-size:26px}h1 .vs{display:block;font-size:20px;margin-top:4px}
+  .lead{font-size:15px}
+  .ai + .ai{padding-left:16px}
+  .ai-rate{font-size:40px}
+  .ai-sub{font-size:13px}
+  .sec{margin-top:44px}
+  .wk{font-size:13px}
+  .wk-r{grid-template-columns:76px repeat(5,minmax(0,1fr));min-height:40px}
+  .wk-h span{font-size:11px;letter-spacing:-.3px}
+  .c{gap:3px}
+  .mk{font-size:14px}
+  .tr{grid-template-columns:minmax(0,1fr) 92px 92px}
+  .rec-hd{grid-template-columns:minmax(0,1fr) auto;row-gap:2px}
+  .rec-d{grid-column:1 / -1}
+  .rec-body{grid-template-columns:1fr;margin-left:0}
+  .rec-v{margin-left:0}
+  .dense .ax{font-size:17px}.dense .val{font-size:15px}
+}
+</style>
