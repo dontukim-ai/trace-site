@@ -32,13 +32,16 @@ Trace by 필터 리포트 공개 사이트(Astro 5, 정적 사이트)다. 데이
 | --- | --- |
 | `src/data/trace.json` | 사이트 데이터. `meta`(한글명·업종·회차 영상)를 포함한다 |
 | `src/data/meta.json` | 예비용. `trace.json`에 `meta`가 없을 때만 쓴다 |
+| `src/data/duel.json` | AI 대결 성적표 데이터(등락률·적중만). 루틴 D 단계가 `claude/live`에만 복사한다. 형식은 `trace-data/docs/duel.md` |
+| `src/data/duel.sample.json` | `/duel/` 예시 데이터. `duel.json`이 없을 때 개발·미리보기 빌드에서만 쓰고, 운영 빌드(`CF_PAGES_BRANCH=claude/live`)에서는 빈 상태를 보여 준다 |
+| `src/lib/duel.ts` | AI 대결 데이터 읽기·표기 헬퍼 |
 | `src/lib/data.ts` | 타입·헬퍼: `pct`(진짜 마이너스 −), `dir`, `nameOf`, `video`(영상 없는 회차는 undefined) 등 |
 | `src/lib/chart.ts` | TraceChart 좌표 계산 |
 | `src/components/TraceChart.astro` | 목록용 차트 (lookback 막대 없음) |
 | `src/components/StockRow.astro` | 목록 한 행. 980px 이하에서 세 줄로 접힌다 |
 | `src/layouts/Base.astro` | 머리글(글자 아랫선 정렬)·바닥글·960px 이하 햄버거 메뉴 |
 | `src/styles/global.css` | 디자인 토큰 |
-| `src/pages/` | `/` Tracing, `/t/<ticker>/` 종목 상세, `/changes/`, `/episodes/`, `/kronos/`, `/criteria/` |
+| `src/pages/` | `/` Tracing, `/t/<ticker>/` 종목 상세, `/changes/`, `/episodes/`, `/kronos/`, `/duel/` AI 대결 성적표, `/criteria/` |
 | `public/fonts/PretendardVariable.woff2` | Pretendard (SIL OFL) |
 
 ## 디자인 규칙 (디자인 시스템 "Trace" v3)
